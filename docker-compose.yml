@@ -1,0 +1,8 @@
+# ANDRIL - Docker Compose Configuration
+#
+# Placeholder for future container orchestration.
+# Services will be configured after the Flutter,
+# Angular, FastAPI, and database environments
+# have been initialized.
+#
+# Do not add or start any services at this stage.
