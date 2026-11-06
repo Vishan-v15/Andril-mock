@@ -1,0 +1,1611 @@
+<div class="screen-viewport" [class.show-debug]="showHotspotGuide()">
+  <!-- Main Screen Background (Visual Source of Truth) -->
+  <img 
+    class="screen-bg" 
+    [src]="currentScreen().imagePath" 
+    [alt]="currentScreen().title" 
+    draggable="false"
+  />
+
+  <!-- Interactive Overlays Layer -->
+  <div class="interactive-overlay">
+
+    <!-- Global Back Hotspot for screens with back buttons -->
+    @if (currentScreen().backRoute) {
+      <button 
+        type="button" 
+        class="hotspot back-button" 
+        (click)="navigateBack()" 
+        title="Go Back"
+        aria-label="Back">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 01: Splash Screen (/splash)             -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '01') {
+      <button 
+        type="button" 
+        class="hotspot splash-tap-area" 
+        (click)="onSplashTap()" 
+        title="Tap to begin">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 02: Choose Your Language (/onboarding/language) -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '02') {
+      <button 
+        type="button" 
+        class="hotspot lang-card lang-en" 
+        [class.active]="state.session().language === 'en'"
+        (click)="selectLanguage('en')" 
+        title="Select English">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot lang-card lang-ta" 
+        [class.active]="state.session().language === 'ta'"
+        (click)="selectLanguage('ta')" 
+        title="Select Tamil">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot lang-card lang-si" 
+        [class.active]="state.session().language === 'si'"
+        (click)="selectLanguage('si')" 
+        title="Select Sinhala">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-lang-continue" 
+        (click)="confirmLanguage()" 
+        title="Continue">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 03: Welcome Screen (/welcome)           -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '03') {
+      <button 
+        type="button" 
+        class="hotspot welcome-module-bubble bubble-learning" 
+        (click)="state.showToast('Learning module: Build skills and grow knowledge.', 'info')"
+        title="Learning Module">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot welcome-module-bubble bubble-hobbies" 
+        (click)="state.showToast('Hobbies module: Explore passions and creative interests.', 'info')"
+        title="Hobbies Module">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot welcome-module-bubble bubble-social" 
+        (click)="state.showToast('Social module: Connect with genuine people (18+ only).', 'info')"
+        title="Social Module">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-welcome-create" 
+        (click)="navigateTo('/auth/register')" 
+        title="Create Account">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot outline-btn btn-welcome-login" 
+        (click)="navigateTo('/auth/login')" 
+        title="Log In">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 04: Create Account (/auth/register)     -->
+    <!-- State M2-ST-01: Validation Errors & Form       -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '04') {
+      <!-- Mock Email Already Taken General Error Banner (M2-ST-01) -->
+      @if (regGeneralError()) {
+        <div class="field-general-banner error">
+          <svg viewBox="0 0 24 24" class="state-icon" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ regGeneralError() }}</span>
+        </div>
+      }
+
+      <!-- Email Field Overlay (Pure solid white masks screenshot placeholder) -->
+      <input 
+        type="email" 
+        class="input-overlay input-reg-email" 
+        [class.has-error]="!!regEmailError()"
+        [value]="regEmail()" 
+        (input)="regEmail.set($any($event.target).value); clearRegError('email')" 
+        placeholder="Email Address" 
+      />
+      @if (regEmailError()) {
+        <div class="field-error-msg msg-reg-email">{{ regEmailError() }}</div>
+      }
+      
+      <!-- Password Field Overlay -->
+      <input 
+        [type]="showRegPassword() ? 'text' : 'password'" 
+        class="input-overlay input-reg-pass" 
+        [class.has-error]="!!regPasswordError()"
+        [value]="regPassword()" 
+        (input)="regPassword.set($any($event.target).value); clearRegError('pass')" 
+        placeholder="Password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-reg-pass" 
+        (click)="showRegPassword.update(v => !v)" 
+        title="Toggle password visibility">
+      </button>
+      @if (regPasswordError()) {
+        <div class="field-error-msg msg-reg-pass">{{ regPasswordError() }}</div>
+      }
+
+      <!-- Confirm Password Field Overlay -->
+      <input 
+        [type]="showRegConfirmPassword() ? 'text' : 'password'" 
+        class="input-overlay input-reg-conf-pass" 
+        [class.has-error]="!!regConfirmError()"
+        [value]="regConfirmPassword()" 
+        (input)="regConfirmPassword.set($any($event.target).value); clearRegError('conf')" 
+        placeholder="Confirm Password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-reg-conf-pass" 
+        (click)="showRegConfirmPassword.update(v => !v)" 
+        title="Toggle password visibility">
+      </button>
+      @if (regConfirmError()) {
+        <div class="field-error-msg msg-reg-conf-pass">{{ regConfirmError() }}</div>
+      }
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-reg-continue" 
+        (click)="onRegisterSubmit()" 
+        title="Continue">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot google-btn btn-reg-google" 
+        (click)="onGoogleAuth()" 
+        title="Continue with Google">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot text-link link-reg-login" 
+        (click)="navigateTo('/auth/login')" 
+        title="Log In">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 05: Verify Your Email (/auth/verify-email) -->
+    <!-- States M2-ST-02, M2-ST-03, M2-ST-04           -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '05') {
+      <!-- Solid background card cleanly covers screenshot "yourname@example.com" without overlap -->
+      <div class="email-display-card" title="Target email address">
+        <span class="email-pill-text">{{ state.session().email || 'alex.rivera@example.com' }}</span>
+      </div>
+
+      <!-- 6-digit OTP Inputs with Solid Background to cover screenshot dashes -->
+      <div class="otp-inputs-row" [class.has-error]="otpState() === 'incorrect'">
+        @for (digit of otpDigits(); track $index) {
+          <input 
+            [id]="'otp-input-' + $index"
+            type="text" 
+            maxlength="1" 
+            class="otp-box" 
+            [class.otp-error]="otpState() === 'incorrect'"
+            [value]="digit" 
+            (input)="onOtpInput($index, $event)" 
+            (keydown)="onOtpKeyDown($index, $event)" 
+          />
+        }
+      </div>
+
+      <!-- M2-ST-02: Incorrect OTP Feedback Notice -->
+      @if (otpState() === 'incorrect') {
+        <div class="otp-feedback-banner error">
+          <svg viewBox="0 0 24 24" class="state-icon" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div class="feedback-content">
+            <span class="feedback-title">Invalid Code Entered</span>
+            <span class="feedback-subtitle">{{ otpAttemptsRemaining() }} attempt(s) remaining</span>
+          </div>
+          <button type="button" class="btn-feedback-retry" (click)="retryOtp()">Retry</button>
+        </div>
+      }
+
+      <!-- M2-ST-03: Expired OTP Feedback Notice -->
+      @if (otpState() === 'expired') {
+        <div class="otp-feedback-banner warning">
+          <svg viewBox="0 0 24 24" class="state-icon" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <div class="feedback-content">
+            <span class="feedback-title">Verification Code Expired</span>
+            <span class="feedback-subtitle">Request a fresh 6-digit code below</span>
+          </div>
+        </div>
+      }
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-otp-verify" 
+        (click)="verifyOtp()" 
+        title="Verify & Continue">
+      </button>
+
+      <!-- Live Interactive Resend Banner (Cleanly covers screenshot static "Didn't receive code? Resend Code in 00:59") -->
+      <div class="resend-countdown-banner">
+        <span class="resend-lead">Didn't receive the code?</span>
+        @if (resendCountdown() > 0 && otpState() !== 'expired') {
+          <div class="resend-timer-box">
+            <span class="resend-text">Resend Code</span> in 00:{{ resendCountdown() < 10 ? '0' + resendCountdown() : resendCountdown() }}
+          </div>
+        } @else {
+          <button 
+            type="button" 
+            class="resend-active-btn" 
+            (click)="resendOtp()" 
+            title="Request New Code">
+            <svg viewBox="0 0 24 24" class="icon-refresh" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            <span>Resend Code Now</span>
+          </button>
+        }
+      </div>
+
+      <!-- M2-ST-04: Email Verified Successfully Modal Dialog -->
+      @if (otpState() === 'success') {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card success-card">
+            <div class="modal-icon-circle success">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Email Verified Successfully</h3>
+            <p class="modal-body">
+              Your account has been authenticated. You can now set up your eligibility and configure your independent module spaces.
+            </p>
+            <div class="modal-badge-demo">
+              <span>DEMO — Simulated Verification</span>
+            </div>
+            <button 
+              type="button" 
+              class="state-modal-btn primary" 
+              (click)="continueToEligibility()">
+              Continue to Eligibility
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 06: Eligibility & Policies (/onboarding/eligibility) -->
+    <!-- State M2-ST-05: Social Underage Restriction (18+) -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '06') {
+      <button 
+        type="button" 
+        class="hotspot text-link link-guidelines" 
+        (click)="openLegalModal('guidelines')" 
+        title="Community Guidelines">
+      </button>
+
+      <input 
+        type="date" 
+        class="input-overlay input-eligibility-dob" 
+        [value]="eligibilityDob()" 
+        (input)="eligibilityDob.set($any($event.target).value)" 
+      />
+
+      <select 
+        class="input-overlay select-eligibility-gender" 
+        [value]="eligibilityGender()" 
+        (change)="eligibilityGender.set($any($event.target).value)">
+        <option value="Female">Female</option>
+        <option value="Male">Male</option>
+        <option value="Non-binary">Non-binary</option>
+        <option value="Prefer not to say">Prefer not to say</option>
+      </select>
+
+      <div class="checkbox-wrapper cb-terms">
+        <input 
+          type="checkbox" 
+          id="cb-terms-input"
+          [checked]="agreeTerms()" 
+          (change)="agreeTerms.set($any($event.target).checked)" 
+        />
+        <label for="cb-terms-input"></label>
+      </div>
+      <button 
+        type="button" 
+        class="hotspot text-link link-terms" 
+        (click)="openLegalModal('terms')" 
+        title="Read Terms of Service">
+      </button>
+
+      <div class="checkbox-wrapper cb-privacy">
+        <input 
+          type="checkbox" 
+          id="cb-privacy-input"
+          [checked]="agreePrivacy()" 
+          (change)="agreePrivacy.set($any($event.target).checked)" 
+        />
+        <label for="cb-privacy-input"></label>
+      </div>
+      <button 
+        type="button" 
+        class="hotspot text-link link-privacy" 
+        (click)="openLegalModal('privacy')" 
+        title="Read Privacy Policy">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-eligibility-continue" 
+        (click)="onEligibilitySubmit()" 
+        title="Continue">
+      </button>
+
+      <!-- M2-ST-05: Social Underage Restriction Warning Modal (18+) -->
+      @if (underageModalOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card warning-card">
+            <div class="modal-icon-circle warning">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M12 8v4M12 16h.01"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Social Requires Age 18+</h3>
+            <p class="modal-body">
+              Under ANDRIL policy, the <strong>Social</strong> module is strictly restricted to verified users aged 18 or older to protect community safety.
+            </p>
+            <div class="modal-notice-box">
+              <span>Entered DOB: {{ eligibilityDob() }}</span>
+              <p>You may continue with full access to <strong>Learning</strong> and <strong>Hobbies</strong> modules.</p>
+            </div>
+            <div class="modal-actions-col">
+              <button 
+                type="button" 
+                class="state-modal-btn primary" 
+                (click)="continueWithoutSocial()">
+                Continue Without Social
+              </button>
+              <button 
+                type="button" 
+                class="state-modal-btn secondary" 
+                (click)="closeUnderageModal()">
+                Back & Edit Date of Birth
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 07: Choose Your Modules (/onboarding/modules) -->
+    <!-- State M2-ST-06: Activation Confirmation       -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '07') {
+      <!-- Module 1: Learning -->
+      <button 
+        type="button" 
+        class="hotspot module-card card-mod-learning" 
+        [class.selected]="state.session().modules.learning"
+        (click)="toggleModuleSelection('learning')" 
+        title="Toggle Learning Module">
+      </button>
+
+      <!-- Module 2: Hobbies -->
+      <button 
+        type="button" 
+        class="hotspot module-card card-mod-hobbies" 
+        [class.selected]="state.session().modules.hobbies"
+        (click)="toggleModuleSelection('hobbies')" 
+        title="Toggle Hobbies Module">
+      </button>
+
+      <!-- Module 3: Social (18+ Only) -->
+      <button 
+        type="button" 
+        class="hotspot module-card card-mod-social" 
+        [class.selected]="state.session().modules.social"
+        [class.disabled]="!state.session().is18Plus"
+        (click)="state.session().is18Plus ? toggleModuleSelection('social') : state.showToast('Social module requires age 18 or older.', 'warning')" 
+        title="Toggle Social Module">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-modules-continue" 
+        (click)="confirmModules()" 
+        title="Continue">
+      </button>
+
+      <!-- M2-ST-06: Module Activation Confirmation Modal -->
+      @if (modulesConfirmModalOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card">
+            <div class="modal-icon-circle info">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Confirm Module Activation</h3>
+            <p class="modal-body">
+              Your selected modules will be initialized with completely isolated profiles and privacy controls:
+            </p>
+
+            <div class="module-summary-chips">
+              <div class="mod-summary-chip" [class.active]="state.session().modules.learning">
+                <span class="chip-dot"></span>
+                <span class="chip-name">Learning</span>
+                <span class="chip-status">{{ state.session().modules.learning ? 'Active' : 'Off' }}</span>
+              </div>
+              <div class="mod-summary-chip" [class.active]="state.session().modules.hobbies">
+                <span class="chip-dot"></span>
+                <span class="chip-name">Hobbies</span>
+                <span class="chip-status">{{ state.session().modules.hobbies ? 'Active' : 'Off' }}</span>
+              </div>
+              <div class="mod-summary-chip" [class.active]="state.session().modules.social" [class.restricted]="!state.session().is18Plus">
+                <span class="chip-dot"></span>
+                <span class="chip-name">Social</span>
+                <span class="chip-status">{{ !state.session().is18Plus ? 'Locked (18+)' : (state.session().modules.social ? 'Active' : 'Off') }}</span>
+              </div>
+            </div>
+
+            @if (modulesActivatingLoading()) {
+              <div class="activation-loading-state">
+                <div class="andril-spinner"></div>
+                <span>Activating your personalized spaces...</span>
+              </div>
+            } @else {
+              <div class="modal-actions-col">
+                <button 
+                  type="button" 
+                  class="state-modal-btn primary" 
+                  (click)="confirmModulesActivation()">
+                  Confirm Activation
+                </button>
+                <button 
+                  type="button" 
+                  class="state-modal-btn secondary" 
+                  (click)="closeModulesConfirmModal()">
+                  Cancel
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 08: Forgot Password (/auth/forgot-password) -->
+    <!-- State M2-ST-07: Request Confirmation          -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '08') {
+      @if (forgotSubmitted()) {
+        <!-- M2-ST-07: Neutral Submitted Confirmation Card -->
+        <div class="state-replacement-card">
+          <div class="modal-icon-circle info">
+            <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h3 class="modal-title">Reset Request Submitted</h3>
+          <p class="modal-body">
+            If an account is associated with <strong>{{ forgotEmail() }}</strong>, instructions to reset your password have been sent.
+          </p>
+          <div class="modal-neutral-notice">
+            <p>For your security, ANDRIL does not reveal whether an email address is registered.</p>
+          </div>
+          <button 
+            type="button" 
+            class="state-modal-btn primary" 
+            (click)="navigateTo('/auth/login')">
+            Return to Login
+          </button>
+        </div>
+      } @else {
+        <input 
+          type="email" 
+          class="input-overlay input-forgot-email" 
+          [value]="forgotEmail()" 
+          (input)="forgotEmail.set($any($event.target).value)" 
+          placeholder="Enter your email address" 
+        />
+
+        <button 
+          type="button" 
+          class="hotspot primary-btn btn-forgot-send" 
+          (click)="sendResetLink()" 
+          title="Send Reset Link">
+        </button>
+
+        <button 
+          type="button" 
+          class="hotspot text-link link-forgot-login" 
+          (click)="navigateTo('/auth/login')" 
+          title="Back to Login">
+        </button>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 09: Create New Password (/auth/reset-password) -->
+    <!-- State M2-ST-08: Reset Password Success        -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '09') {
+      <input 
+        [type]="showResetPassword() ? 'text' : 'password'" 
+        class="input-overlay input-reset-new-pass" 
+        [value]="resetPassword()" 
+        (input)="resetPassword.set($any($event.target).value)" 
+        placeholder="Enter new password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-reset-new" 
+        (click)="showResetPassword.update(v => !v)" 
+        title="Toggle password visibility">
+      </button>
+
+      <input 
+        [type]="showResetConfirmPassword() ? 'text' : 'password'" 
+        class="input-overlay input-reset-conf-pass" 
+        [value]="resetConfirmPassword()" 
+        (input)="resetConfirmPassword.set($any($event.target).value)" 
+        placeholder="Re-enter new password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-reset-conf" 
+        (click)="showResetConfirmPassword.update(v => !v)" 
+        title="Toggle password visibility">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-reset-update" 
+        (click)="updateResetPassword()" 
+        title="Update Password">
+      </button>
+
+      <!-- M2-ST-08: Password Updated Success Modal -->
+      @if (resetSuccessModalOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card success-card">
+            <div class="modal-icon-circle success">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Password Updated</h3>
+            <p class="modal-body">
+              Your password has been securely updated. You can now log in with your new credentials.
+            </p>
+            <div class="modal-badge-demo">
+              <span>DEMO — No plaintext passwords stored</span>
+            </div>
+            <button 
+              type="button" 
+              class="state-modal-btn primary" 
+              (click)="navigateTo('/auth/login')">
+              Back to Login
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN 10: Log In Screen (/auth/login)         -->
+    <!-- State M2-ST-09: Invalid Credentials Error      -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === '10') {
+      <!-- M2-ST-09: Error Banner -->
+      @if (loginError()) {
+        <div class="login-error-banner">
+          <svg viewBox="0 0 24 24" class="state-icon" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>{{ loginError() }}</span>
+        </div>
+      }
+
+      <input 
+        type="email" 
+        class="input-overlay input-login-email" 
+        [class.has-error]="!!loginError()"
+        [value]="loginEmail()" 
+        (input)="loginEmail.set($any($event.target).value); loginError.set(null)" 
+        placeholder="Email Address" 
+      />
+
+      <input 
+        [type]="showLoginPassword() ? 'text' : 'password'" 
+        class="input-overlay input-login-pass" 
+        [class.has-error]="!!loginError()"
+        [value]="loginPassword()" 
+        (input)="loginPassword.set($any($event.target).value); loginError.set(null)" 
+        placeholder="Password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-login-pass" 
+        (click)="showLoginPassword.update(v => !v)" 
+        title="Toggle password visibility">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot text-link link-login-forgot" 
+        (click)="navigateTo('/auth/forgot-password')" 
+        title="Forgot Password?">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-login-submit" 
+        [class.loading]="loginLoading()"
+        (click)="onLoginSubmit()" 
+        title="Log In">
+        @if (loginLoading()) {
+          <div class="btn-spinner"></div>
+        }
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot google-btn btn-login-google" 
+        (click)="onGoogleAuth('/settings')" 
+        title="Continue with Google">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot text-link link-login-create" 
+        (click)="navigateTo('/auth/register')" 
+        title="Create Account">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-00: Account Settings (/settings)    -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-00') {
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-modules" 
+        (click)="navigateTo('/settings/modules')" 
+        title="Manage Modules">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-language" 
+        (click)="navigateTo('/settings/language')" 
+        title="Language">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-security" 
+        (click)="navigateTo('/settings/security')" 
+        title="Security & Password">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-privacy" 
+        (click)="navigateTo('/settings/privacy')" 
+        title="Privacy & Personal Data">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-premium" 
+        (click)="navigateTo('/settings/premium')" 
+        title="Premium Membership">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-payments" 
+        (click)="navigateTo('/settings/payments')" 
+        title="Payment History">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-wallet" 
+        (click)="navigateTo('/settings/wallet')" 
+        title="Coin Wallet">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-invite" 
+        (click)="navigateTo('/settings/invite')" 
+        title="Invite Friends">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-about" 
+        (click)="navigateTo('/settings/about')" 
+        title="About ANDRIL">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-logout" 
+        (click)="navigateTo('/settings/logout')" 
+        title="Log Out">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot settings-row row-set-delete" 
+        (click)="navigateTo('/settings/delete-account')" 
+        title="Delete Account">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-01: Manage Modules (/settings/modules) -->
+    <!-- States M2-ST-10, M2-ST-11                     -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-01') {
+      <button 
+        type="button" 
+        class="hotspot toggle-switch-area toggle-mod-learning" 
+        [class.is-on]="state.session().modules.learning"
+        (click)="state.session().modules.learning ? requestDeactivation('learning') : toggleModuleSelection('learning')" 
+        title="Toggle Learning Module">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot toggle-switch-area toggle-mod-hobbies" 
+        [class.is-on]="state.session().modules.hobbies"
+        (click)="state.session().modules.hobbies ? requestDeactivation('hobbies') : toggleModuleSelection('hobbies')" 
+        title="Toggle Hobbies Module">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot toggle-switch-area toggle-mod-social" 
+        [class.is-on]="state.session().modules.social"
+        (click)="state.session().modules.social ? requestDeactivation('social') : toggleModuleSelection('social')" 
+        title="Toggle Social Module">
+      </button>
+
+      <!-- M2-ST-11: Reactivation States Card for Deactivated Module -->
+      @if (reactivationPreviewActive() || !state.session().modules.hobbies) {
+        <div class="reactivation-card-overlay">
+          <div class="reactivation-demo-header">
+            <span class="reactivation-label">DEMO Reactivation State:</span>
+            <div class="reactivation-variant-toggle">
+              <button 
+                type="button" 
+                class="variant-btn" 
+                [class.active]="reactivationVariant() === 'grace'"
+                (click)="reactivationVariant.set('grace')">
+                Variant A (Grace)
+              </button>
+              <button 
+                type="button" 
+                class="variant-btn" 
+                [class.active]="reactivationVariant() === 'expired'"
+                (click)="reactivationVariant.set('expired')">
+                Variant B (Expired)
+              </button>
+            </div>
+          </div>
+
+          @if (reactivationVariant() === 'grace') {
+            <!-- Variant A: Within 21-day grace period -->
+            <div class="reactivation-body grace-variant">
+              <div class="status-pill warning">Deactivated — 14 Days Remaining</div>
+              <p class="reactivation-desc">
+                Your <strong>Hobbies</strong> profile and connections are safely preserved. You can reactivate at any time within the 21-day grace period.
+              </p>
+              <button 
+                type="button" 
+                class="btn-reactivate-action" 
+                (click)="reactivateTargetModule('hobbies')">
+                Reactivate Hobbies Module
+              </button>
+            </div>
+          } @else {
+            <!-- Variant B: Expired >21 days, profile purged -->
+            <div class="reactivation-body expired-variant">
+              <div class="status-pill danger">Grace Period Expired</div>
+              <p class="reactivation-desc">
+                The 21-day reactivation window has elapsed. As per data retention policies, your previous profile was permanently removed. A fresh profile setup is required.
+              </p>
+              <button 
+                type="button" 
+                class="btn-reactivate-action fresh" 
+                (click)="startFreshModuleSetup('hobbies')">
+                Start Fresh Profile Setup
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- M2-ST-10: Deactivation Warning Bottom Sheet Dialog -->
+      @if (deactivationWarningOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-bottom-sheet warning-sheet">
+            <div class="sheet-handle"></div>
+            <div class="modal-icon-circle warning">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Deactivate {{ deactivationModuleTarget() | titlecase }}?</h3>
+            <p class="modal-body">
+              Are you sure you want to deactivate your <strong>{{ deactivationModuleTarget() | titlecase }}</strong> module?
+            </p>
+            <div class="deactivation-rule-box">
+              <div class="rule-item">
+                <strong>21-Day Reactivation:</strong> Your profile data is preserved for 21 days in case you wish to return.
+              </div>
+              <div class="rule-item">
+                <strong>Independent Spaces:</strong> Your other active modules will not be affected.
+              </div>
+            </div>
+            <div class="modal-actions-col">
+              <button 
+                type="button" 
+                class="state-modal-btn danger" 
+                (click)="confirmDeactivation()">
+                Confirm Deactivation
+              </button>
+              <button 
+                type="button" 
+                class="state-modal-btn secondary" 
+                (click)="cancelDeactivation()">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-02: Language Settings (/settings/language) -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-02') {
+      <button 
+        type="button" 
+        class="hotspot set-lang-row set-lang-en" 
+        [class.active]="state.session().language === 'en'"
+        (click)="selectLanguage('en')" 
+        title="English">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot set-lang-row set-lang-ta" 
+        [class.active]="state.session().language === 'ta'"
+        (click)="selectLanguage('ta')" 
+        title="Tamil">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot set-lang-row set-lang-si" 
+        [class.active]="state.session().language === 'si'"
+        (click)="selectLanguage('si')" 
+        title="Sinhala">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-save-language" 
+        (click)="saveLanguageSettings()" 
+        title="Save Language">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-03: Security & Password (/settings/security) -->
+    <!-- State M2-ST-12: Password Change Success        -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-03') {
+      <input 
+        [type]="showSecCurrent() ? 'text' : 'password'" 
+        class="input-overlay input-sec-current" 
+        [value]="secCurrentPassword()" 
+        (input)="secCurrentPassword.set($any($event.target).value)" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-sec-current" 
+        (click)="showSecCurrent.update(v => !v)" 
+        title="Toggle visibility">
+      </button>
+
+      <input 
+        [type]="showSecNew() ? 'text' : 'password'" 
+        class="input-overlay input-sec-new" 
+        [value]="secNewPassword()" 
+        (input)="secNewPassword.set($any($event.target).value)" 
+        placeholder="New password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-sec-new" 
+        (click)="showSecNew.update(v => !v)" 
+        title="Toggle visibility">
+      </button>
+
+      <input 
+        [type]="showSecConfirm() ? 'text' : 'password'" 
+        class="input-overlay input-sec-confirm" 
+        [value]="secConfirmPassword()" 
+        (input)="secConfirmPassword.set($any($event.target).value)" 
+        placeholder="Confirm new password" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-sec-confirm" 
+        (click)="showSecConfirm.update(v => !v)" 
+        title="Toggle visibility">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot text-link link-sec-forgot" 
+        (click)="navigateTo('/auth/forgot-password')" 
+        title="Forgot Password?">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-sec-update" 
+        (click)="updateSecurityPassword()" 
+        title="Update Password">
+      </button>
+
+      <!-- M2-ST-12: Password Changed Successfully Modal -->
+      @if (secSuccessModalOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card success-card">
+            <div class="modal-icon-circle success">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Password Changed Successfully</h3>
+            <p class="modal-body">
+              Your account password has been updated. All active sessions remain secure.
+            </p>
+            <div class="modal-badge-demo">
+              <span>DEMO — No plaintext passwords stored</span>
+            </div>
+            <button 
+              type="button" 
+              class="state-modal-btn primary" 
+              (click)="closeSecSuccessModal()">
+              Return to Settings
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-04: Privacy & Personal Data (/settings/privacy) -->
+    <!-- State M2-ST-13: Global Block Confirmation     -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-04') {
+      <button 
+        type="button" 
+        class="hotspot privacy-row row-priv-account" 
+        (click)="openLegalModal('privacy')" 
+        title="Account Privacy">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot privacy-row row-priv-learning" 
+        (click)="openLegalModal('privacy')" 
+        title="Learning Privacy">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot privacy-row row-priv-hobbies" 
+        (click)="openLegalModal('privacy')" 
+        title="Hobbies Privacy">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot privacy-row row-priv-social" 
+        (click)="openLegalModal('privacy')" 
+        title="Social Privacy">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot privacy-row row-priv-blocked" 
+        (click)="triggerBlockModal()" 
+        title="Blocked Accounts (Demo Block Dialog)">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot privacy-row row-priv-data" 
+        (click)="openLegalModal('safety')" 
+        title="Personal Data Information">
+      </button>
+
+      <!-- M2-ST-13: Global Block Confirmation Dialog -->
+      @if (blockDialogOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card warning-card">
+            <div class="modal-icon-circle danger">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Global Block Confirmation</h3>
+            <p class="modal-body">
+              Block user <strong>{{ mockUserToBlock().handle }}</strong> (ID: {{ mockUserToBlock().id }}) across ANDRIL?
+            </p>
+            <div class="block-details-box">
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24" class="check-icon" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Blocks across Learning, Hobbies, and Social</span>
+              </div>
+              <div class="detail-row">
+                <svg viewBox="0 0 24 24" class="check-icon" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Module personas and contacts remain strictly isolated</span>
+              </div>
+            </div>
+            <div class="modal-actions-col">
+              <button 
+                type="button" 
+                class="state-modal-btn danger" 
+                (click)="confirmGlobalBlock()">
+                Confirm Global Block
+              </button>
+              <button 
+                type="button" 
+                class="state-modal-btn secondary" 
+                (click)="closeBlockModal()">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-05: Premium Membership (/settings/premium) -->
+    <!-- State M2-ST-14: Plan Selection & Demo Checkout -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-05') {
+      <!-- Individual module selection ($1.49/mo) -->
+      <button 
+        type="button" 
+        class="hotspot prem-mod-chip chip-prem-learning" 
+        [class.selected]="selectedIndividualModule() === 'learning'"
+        (click)="selectIndividualModulePlan('learning')" 
+        title="Learning ($1.49/mo)">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot prem-mod-chip chip-prem-hobbies" 
+        [class.selected]="selectedIndividualModule() === 'hobbies'"
+        (click)="selectIndividualModulePlan('hobbies')" 
+        title="Hobbies ($1.49/mo)">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot prem-mod-chip chip-prem-social" 
+        [class.selected]="selectedIndividualModule() === 'social'"
+        (click)="selectIndividualModulePlan('social')" 
+        title="Social ($1.49/mo)">
+      </button>
+
+      <!-- Full ANDRIL plans -->
+      <button 
+        type="button" 
+        class="hotspot prem-full-card card-prem-1m" 
+        [class.selected]="selectedFullPlanDuration() === '1 Month'"
+        (click)="selectFullPlan('1 Month', '$2.99')" 
+        title="1 Month ($2.99)">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot prem-full-card card-prem-3m" 
+        [class.selected]="selectedFullPlanDuration() === '3 Months'"
+        (click)="selectFullPlan('3 Months', '$7.99')" 
+        title="3 Months ($7.99)">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot prem-full-card card-prem-6m" 
+        [class.selected]="selectedFullPlanDuration() === '6 Months'"
+        (click)="selectFullPlan('6 Months', '$14.99')" 
+        title="6 Months ($14.99)">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot primary-btn btn-prem-continue" 
+        (click)="confirmPremium()" 
+        title="Confirm Plan">
+      </button>
+
+      <!-- M2-ST-14: Premium Demo Checkout Modal -->
+      @if (premiumCheckoutOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card premium-checkout-card">
+            <div class="modal-icon-circle premium">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Demo Checkout Summary</h3>
+            <div class="checkout-plan-info">
+              <span class="checkout-plan-name">{{ premiumCheckoutData()?.planName }}</span>
+              <span class="checkout-plan-price">{{ premiumCheckoutData()?.price }}</span>
+              <span class="checkout-plan-period">{{ premiumCheckoutData()?.period }}</span>
+            </div>
+            <p class="checkout-coverage">{{ premiumCheckoutData()?.coverage }}</p>
+            <div class="checkout-demo-disclaimer">
+              <svg viewBox="0 0 24 24" class="icon-info" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span>DEMO — No payment processed. Benefits remain pending.</span>
+            </div>
+            <div class="modal-actions-col">
+              <button 
+                type="button" 
+                class="state-modal-btn primary" 
+                (click)="confirmPremiumDemoCheckout()">
+                Confirm Demo Selection
+              </button>
+              <button 
+                type="button" 
+                class="state-modal-btn secondary" 
+                (click)="closePremiumCheckout()">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-06: Payment History (/settings/payments) -->
+    <!-- State M2-ST-15: Payment History Empty State   -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-06') {
+      <!-- Tabs -->
+      <button 
+        type="button" 
+        class="hotspot pay-tab tab-pay-all" 
+        [class.active]="paymentFilter() === 'all'"
+        (click)="setPaymentFilter('all')" 
+        title="All Transactions">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot pay-tab tab-pay-prem" 
+        [class.active]="paymentFilter() === 'premium'"
+        (click)="setPaymentFilter('premium')" 
+        title="Premium Transactions">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot pay-tab tab-pay-coins" 
+        [class.active]="paymentFilter() === 'coins'"
+        (click)="setPaymentFilter('coins')" 
+        title="Coins Transactions">
+      </button>
+
+      <!-- Reviewer Demo Toggle Button for Empty vs Sample Receipts -->
+      <button 
+        type="button" 
+        class="pay-demo-state-switch" 
+        (click)="togglePaymentRecords()" 
+        title="Toggle between Empty state and Sample DEMO receipts">
+        <span>{{ showMockPayments() ? 'Switch to Empty State' : 'Switch to Sample Receipts' }}</span>
+      </button>
+
+      @if (!showMockPayments()) {
+        <!-- M2-ST-15: Clean Empty State Display -->
+        <div class="payments-empty-overlay">
+          <div class="empty-receipt-icon">
+            <svg viewBox="0 0 24 24" class="receipt-svg" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16l3-2 3 2 3-2 3 2 3-2 3 2V8l-6-6z"/>
+              <path d="M14 2v6h6M8 12h8M8 16h5"/>
+            </svg>
+          </div>
+          <h4 class="empty-title">No Payment Records Yet</h4>
+          <p class="empty-desc">
+            @if (paymentFilter() === 'all') {
+              Your full transaction history for Premium upgrades and coin purchases will appear here.
+            } @else if (paymentFilter() === 'premium') {
+              No active or historical Premium membership billing records found.
+            } @else {
+              No coin purchase transactions recorded on this account.
+            }
+          </p>
+          <button 
+            type="button" 
+            class="btn-empty-action" 
+            (click)="navigateTo('/settings/premium')">
+            Explore Premium Plans
+          </button>
+        </div>
+      } @else {
+        <!-- Sample Fixtures identified as DEMO -->
+        <div class="mock-records-overlay">
+          <div class="demo-records-notice">DEMO Transaction Fixtures</div>
+          <div class="mock-record-card">
+            <div class="rec-header">
+              <span class="rec-title">Full ANDRIL Premium (1 Month)</span>
+              <span class="rec-price">$2.99</span>
+            </div>
+            <div class="rec-date">Today • Paid via Google Play (DEMO)</div>
+          </div>
+          <div class="mock-record-card">
+            <div class="rec-header">
+              <span class="rec-title">Learning Module Upgrade</span>
+              <span class="rec-price">$1.49</span>
+            </div>
+            <div class="rec-date">Last Month • Paid via Card (DEMO)</div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-07: Coin Wallet (/settings/wallet)   -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-07') {
+      <button 
+        type="button" 
+        class="hotspot wallet-card card-wallet-purchased" 
+        (click)="state.showToast('Purchased coins: 150 verified balance.', 'info')" 
+        title="Purchased Coins">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot wallet-card card-wallet-referral" 
+        (click)="state.showToast('Referral rewards: 50 pending policy approval.', 'info')" 
+        title="Referral Coins">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot wallet-card card-wallet-buy" 
+        (click)="state.showPlaceholder('Coin Store', 'Pending Approval', 'Real money coin purchases and packages will be activated once in-app billing is connected.', 'Coin Wallet')" 
+        title="Buy Coins">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot wallet-card card-wallet-history" 
+        (click)="state.showToast('No coin debits or credits yet.', 'info')" 
+        title="Transaction History">
+      </button>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-08: Log Out Modal (/settings/logout) -->
+    <!-- State M2-ST-17: Logout Confirmation           -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-08') {
+      <div class="state-modal-overlay">
+        <div class="state-bottom-sheet">
+          <div class="sheet-handle"></div>
+          <div class="modal-icon-circle info">
+            <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </div>
+          <h3 class="modal-title">Log Out of ANDRIL?</h3>
+          <p class="modal-body">
+            You are logging out of your current device session. Your module profiles, progress, and settings remain safely stored.
+          </p>
+          @if (logoutLoading()) {
+            <div class="activation-loading-state">
+              <div class="andril-spinner"></div>
+              <span>Signing out securely...</span>
+            </div>
+          } @else {
+            <div class="modal-actions-col">
+              <button 
+                type="button" 
+                class="state-modal-btn danger" 
+                (click)="confirmLogoutAction()">
+                Confirm Log Out
+              </button>
+              <button 
+                type="button" 
+                class="state-modal-btn secondary" 
+                (click)="closeLogoutModal()">
+                Cancel
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-09: Delete Account (/settings/delete-account) -->
+    <!-- State M2-ST-18: Delete Account Final Confirmation -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-09') {
+      <input 
+        [type]="showDeletePassword() ? 'text' : 'password'" 
+        class="input-overlay input-del-password" 
+        [class.has-error]="!!deletePasswordError()"
+        [value]="deletePassword()" 
+        (input)="deletePassword.set($any($event.target).value); deletePasswordError.set(null)" 
+        placeholder="Enter password to confirm" 
+      />
+      <button 
+        type="button" 
+        class="hotspot eye-toggle eye-del-pass" 
+        (click)="showDeletePassword.update(v => !v)" 
+        title="Toggle visibility">
+      </button>
+
+      @if (deletePasswordError()) {
+        <div class="field-error-msg msg-del-pass">{{ deletePasswordError() }}</div>
+      }
+
+      <div class="checkbox-wrapper cb-delete-confirm">
+        <input 
+          type="checkbox" 
+          id="cb-del-input"
+          [checked]="deleteConfirmed()" 
+          (change)="deleteConfirmed.set($any($event.target).checked)" 
+        />
+        <label for="cb-del-input"></label>
+      </div>
+
+      <button 
+        type="button" 
+        class="hotspot dialog-btn btn-del-cancel" 
+        (click)="navigateTo('/settings')" 
+        title="Cancel">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot dialog-btn btn-del-confirm" 
+        (click)="confirmDeleteAccount()" 
+        title="Delete Account">
+      </button>
+
+      <!-- M2-ST-18: Final Deletion Confirmation Modal -->
+      @if (deleteModalOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card danger-card">
+            <div class="modal-icon-circle danger">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Permanent Account Closure</h3>
+            <p class="modal-body">
+              This action cannot be undone. All 3 module profiles (Learning, Hobbies, Social), connections, and balances will be scheduled for permanent deletion.
+            </p>
+            <div class="retention-notice-box">
+              <strong>Data Retention Notice:</strong> Basic regulatory logs are retained for 30 days under compliance requirements before permanent purge.
+            </div>
+            @if (deleteProcessing()) {
+              <div class="activation-loading-state">
+                <div class="andril-spinner"></div>
+                <span>Processing account closure...</span>
+              </div>
+            } @else {
+              <div class="modal-actions-col">
+                <button 
+                  type="button" 
+                  class="state-modal-btn danger" 
+                  (click)="confirmFinalDelete()">
+                  Confirm Permanent Delete
+                </button>
+                <button 
+                  type="button" 
+                  class="state-modal-btn secondary" 
+                  (click)="closeDeleteModal()">
+                  Cancel
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- M2-ST-18: Demo Closure Complete Dialog -->
+      @if (deleteDoneModalOpen()) {
+        <div class="state-modal-overlay">
+          <div class="state-modal-card">
+            <div class="modal-icon-circle info">
+              <svg viewBox="0 0 24 24" class="modal-icon" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+            <h3 class="modal-title">Account Closed (DEMO)</h3>
+            <p class="modal-body">
+              This was a simulated account closure demonstration. No actual data was deleted from any live production database.
+            </p>
+            <button 
+              type="button" 
+              class="state-modal-btn primary" 
+              (click)="finishAccountClosure()">
+              Return to Welcome
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-10: Invite Friends (/settings/invite) -->
+    <!-- State M2-ST-16: Referral Progress Stepper     -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-10') {
+      <div class="referral-link-display" title="Unique referral link">
+        https://andril.app/ref/{{ state.session().referralCode }}
+      </div>
+
+      <button 
+        type="button" 
+        class="hotspot btn-copy-referral" 
+        (click)="state.copyReferralLink()" 
+        title="Copy Link">
+      </button>
+
+      <button 
+        type="button" 
+        class="hotspot btn-share-referral" 
+        (click)="state.shareReferralLink()" 
+        title="Share Link">
+      </button>
+
+      <!-- M2-ST-16: 4-Stage Referral Pipeline Stepper -->
+      <div class="referral-pipeline-card">
+        <div class="pipeline-header">
+          <span class="pipeline-title">Referral Reward Progression</span>
+          <span class="pipeline-badge">DEMO Pipeline</span>
+        </div>
+
+        <div class="pipeline-stepper">
+          <button type="button" class="step-chip" [class.active]="referralPipelineStep() >= 1" (click)="setReferralStep(1)">
+            <span class="step-num">1</span>
+            <span class="step-label">Invited</span>
+          </button>
+          <div class="step-line" [class.active]="referralPipelineStep() >= 2"></div>
+          <button type="button" class="step-chip" [class.active]="referralPipelineStep() >= 2" (click)="setReferralStep(2)">
+            <span class="step-num">2</span>
+            <span class="step-label">Verified</span>
+          </button>
+          <div class="step-line" [class.active]="referralPipelineStep() >= 3"></div>
+          <button type="button" class="step-chip" [class.active]="referralPipelineStep() >= 3" (click)="setReferralStep(3)">
+            <span class="step-num">3</span>
+            <span class="step-label">Active</span>
+          </button>
+          <div class="step-line" [class.active]="referralPipelineStep() >= 4"></div>
+          <button type="button" class="step-chip" [class.active]="referralPipelineStep() >= 4" (click)="setReferralStep(4)">
+            <span class="step-num">4</span>
+            <span class="step-label">Rewarded</span>
+          </button>
+        </div>
+
+        <div class="step-description-box">
+          @if (referralPipelineStep() === 1) {
+            <div class="step-text"><strong>Stage 1 (Pending):</strong> Friend was invited with link; waiting for account registration.</div>
+          } @else if (referralPipelineStep() === 2) {
+            <div class="step-text"><strong>Stage 2 (Qualified):</strong> Friend registered and completed email verification.</div>
+          } @else if (referralPipelineStep() === 3) {
+            <div class="step-text"><strong>Stage 3 (Pending Verification):</strong> Friend activated their first module (Learning); anti-abuse verification pending.</div>
+          } @else {
+            <div class="step-text success"><strong>Stage 4 (Rewarded):</strong> Referral policy satisfied! +50 Demo Coins credited to your wallet.</div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ============================================== -->
+    <!-- SCREEN SET-11: About ANDRIL (/settings/about)   -->
+    <!-- ============================================== -->
+    @if (currentScreen().code === 'SET-11') {
+      <!-- Social links -->
+      <button 
+        type="button" 
+        class="hotspot about-social-row row-about-ig" 
+        (click)="openLegalModal('social')" 
+        title="Instagram">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot about-social-row row-about-fb" 
+        (click)="openLegalModal('social')" 
+        title="Facebook">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot about-social-row row-about-tt" 
+        (click)="openLegalModal('social')" 
+        title="TikTok">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot about-social-row row-about-x" 
+        (click)="openLegalModal('social')" 
+        title="X (Twitter)">
+      </button>
+
+      <!-- Legal & contact links -->
+      <button 
+        type="button" 
+        class="hotspot about-legal-row row-about-support" 
+        (click)="state.showToast('Support email: support@andril.app', 'info')" 
+        title="Support Email">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot about-legal-row row-about-privacy" 
+        (click)="openLegalModal('privacy')" 
+        title="Privacy Policy">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot about-legal-row row-about-terms" 
+        (click)="openLegalModal('terms')" 
+        title="Terms & Conditions">
+      </button>
+      <button 
+        type="button" 
+        class="hotspot about-legal-row row-about-guidelines" 
+        (click)="openLegalModal('guidelines')" 
+        title="Community Guidelines">
+      </button>
+    }
+
+  </div>
+</div>

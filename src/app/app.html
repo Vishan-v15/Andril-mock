@@ -1,0 +1,314 @@
+<div class="prototype-app-container">
+  
+  <!-- Sleek Top Companion Toolbar (Desktop & Tablet) -->
+  <header class="prototype-toolbar">
+    <div class="toolbar-brand">
+      <span class="brand-logo">A</span>
+      <div class="brand-text">
+        <span class="brand-title">ANDRIL</span>
+        <span class="brand-subtitle">Pixel 7 Pro Interactive Mobile Prototype</span>
+      </div>
+    </div>
+
+    <!-- Screen Navigator & Quick Jump -->
+    <div class="toolbar-center">
+      <div class="screen-picker-wrapper">
+        <label for="screen-select-dropdown" class="sr-only">Screen</label>
+        <select 
+          id="screen-select-dropdown"
+          class="screen-dropdown" 
+          [value]="currentScreen().route" 
+          (change)="jumpToScreen($any($event.target).value)">
+          <optgroup label="Onboarding & Welcome (Screens 01-07)">
+            @for (s of onboardingScreens(); track s.id) {
+              <option [value]="s.route">
+                [{{ s.code }}] {{ s.title }}
+              </option>
+            }
+          </optgroup>
+          <optgroup label="Authentication & Recovery (Screens 08-10)">
+            @for (s of authScreens(); track s.id) {
+              <option [value]="s.route">
+                [{{ s.code }}] {{ s.title }}
+              </option>
+            }
+          </optgroup>
+          <optgroup label="Account Settings (SET-00 to SET-11)">
+            @for (s of settingsScreens(); track s.id) {
+              <option [value]="s.route">
+                [{{ s.code }}] {{ s.title }}
+              </option>
+            }
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- Demo States (18) Inspector Dropdown -->
+      <div class="demo-state-picker-wrapper">
+        <label for="demo-state-select-dropdown" class="sr-only">Demo State</label>
+        <select 
+          id="demo-state-select-dropdown"
+          class="demo-state-dropdown" 
+          [value]="currentDemoStateId()" 
+          (change)="jumpToDemoState($any($event.target).value)">
+          <option value="" [selected]="!currentDemoStateId()">⚡ Preview Demo States (18)...</option>
+          <optgroup label="Authentication States (M2-ST-01 to 04, 07 to 09)">
+            @for (st of demoStatesAuth(); track st.id) {
+              <option [value]="st.id">
+                [{{ st.id }}] {{ st.title }}
+              </option>
+            }
+          </optgroup>
+          <optgroup label="Onboarding States (M2-ST-05, M2-ST-06)">
+            @for (st of demoStatesOnboarding(); track st.id) {
+              <option [value]="st.id">
+                [{{ st.id }}] {{ st.title }}
+              </option>
+            }
+          </optgroup>
+          <optgroup label="Settings States (M2-ST-10 to M2-ST-18)">
+            @for (st of demoStatesSettings(); track st.id) {
+              <option [value]="st.id">
+                [{{ st.id }}] {{ st.title }}
+              </option>
+            }
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- Active Module Badges -->
+      <div class="module-status-group">
+        <span class="module-pill" [class.active]="state.session().modules.learning" title="Learning Module Status">
+          Learning: {{ state.session().modules.learning ? 'ON' : 'OFF' }}
+        </span>
+        <span class="module-pill" [class.active]="state.session().modules.hobbies" title="Hobbies Module Status">
+          Hobbies: {{ state.session().modules.hobbies ? 'ON' : 'OFF' }}
+        </span>
+        <span class="module-pill" [class.active]="state.session().modules.social" title="Social Module Status (18+)">
+          Social: {{ state.session().modules.social ? 'ON' : 'OFF' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions & Tools -->
+    <div class="toolbar-actions">
+      <button 
+        type="button" 
+        class="tool-btn" 
+        [class.active]="inspectMode()" 
+        (click)="toggleInspectMode()" 
+        title="Toggle visible hotspots for verification">
+        <svg viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span>{{ inspectMode() ? 'Hotspots ON' : 'Inspect' }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tool-btn" 
+        [class.active]="assetGalleryOpen()" 
+        (click)="toggleAssetGallery()" 
+        title="Open Dev Asset Catalog (99 Images)">
+        <svg viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Assets (99)</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tool-btn" 
+        (click)="copyCurrentUrl()" 
+        title="Copy direct route link">
+        <svg viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        <span>Share Route</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tool-btn btn-reset" 
+        (click)="resetDemo()" 
+        title="Reset mock session and data">
+        <svg viewBox="0 0 24 24" class="icon" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        <span>Reset</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Centered Device Stage -->
+  <main class="device-stage">
+    
+    <!-- Google Pixel 7 Pro Device Shell -->
+    <div class="pixel-device-frame" [class.mode-fill]="deviceScaleMode() === 'fill'">
+      
+      <!-- Screen Display Area (1440 × 3120 Aspect Ratio) -->
+      <div class="pixel-display-surface">
+        <router-outlet></router-outlet>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Prototype Toast Notifications -->
+  <div class="toast-stack" aria-live="polite">
+    @for (toast of state.toasts(); track toast.id) {
+      <div class="toast-bubble" [class]="'toast-' + toast.type">
+        <span class="toast-icon">
+          @if (toast.type === 'success') { ✓ }
+          @else if (toast.type === 'error') { ✕ }
+          @else if (toast.type === 'warning') { ⚠ }
+          @else { ℹ }
+        </span>
+        <span class="toast-text">{{ toast.text }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Global Prototype Placeholder Dialog -->
+  @if (state.placeholderModal(); as modal) {
+    <div class="modal-backdrop" (click)="state.closePlaceholder()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-badge">Prototype Destination</div>
+          <button type="button" class="btn-close-modal" (click)="state.closePlaceholder()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon-circle">
+            <svg viewBox="0 0 24 24" class="modal-svg" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <h3 class="modal-title">{{ modal.title }}</h3>
+          <h4 class="modal-subtitle">{{ modal.subtitle }}</h4>
+          <p class="modal-desc">{{ modal.description }}</p>
+          <div class="modal-source-tag">Source Screen: {{ modal.sourceScreen }}</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-dismiss" (click)="state.closePlaceholder()">
+            Understood
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Development-Only Asset Catalog Modal -->
+  @if (assetGalleryOpen()) {
+    <div class="asset-gallery-backdrop" (click)="toggleAssetGallery()">
+      <div class="asset-gallery-drawer" (click)="$event.stopPropagation()">
+        <div class="gallery-header">
+          <div class="gallery-title-box">
+            <span class="gallery-badge">DEV TOOL</span>
+            <h3 class="gallery-title">Imported Prototype Assets ({{ importedAssets.length }})</h3>
+          </div>
+          
+          <div class="gallery-controls">
+            <!-- Filter Pills -->
+            <div class="gallery-filter-pills">
+              <button type="button" class="pill-btn" [class.active]="galleryFilter() === 'all'" (click)="setGalleryFilter('all')">
+                All (99)
+              </button>
+              <button type="button" class="pill-btn" [class.active]="galleryFilter() === 'learning'" (click)="setGalleryFilter('learning')">
+                Learning (30)
+              </button>
+              <button type="button" class="pill-btn" [class.active]="galleryFilter() === 'hobbies'" (click)="setGalleryFilter('hobbies')">
+                Hobbies (30)
+              </button>
+              <button type="button" class="pill-btn" [class.active]="galleryFilter() === 'social'" (click)="setGalleryFilter('social')">
+                Social (30)
+              </button>
+              <button type="button" class="pill-btn" [class.active]="galleryFilter() === 'shared-core'" (click)="setGalleryFilter('shared-core')">
+                Shared Core (9)
+              </button>
+            </div>
+
+            <!-- Search -->
+            <input 
+              type="text" 
+              class="gallery-search-input" 
+              placeholder="Search screen ID, title, or filename..." 
+              [value]="gallerySearch()" 
+              (input)="gallerySearch.set($any($event.target).value)" 
+            />
+
+            <button type="button" class="btn-close-gallery" (click)="toggleAssetGallery()">✕</button>
+          </div>
+        </div>
+
+        <!-- Asset Cards Grid -->
+        <div class="gallery-grid">
+          @for (item of filteredAssets(); track item.assetId) {
+            <div class="asset-card" (click)="openAssetDetail(item)">
+              <div class="card-thumb-box">
+                <img [src]="item.publicAssetUrl" [alt]="item.screenTitle" loading="lazy" class="card-thumb" />
+                <span class="card-mod-tag" [class]="'tag-' + item.module">{{ item.module | uppercase }}</span>
+              </div>
+              <div class="card-info">
+                <div class="card-id-row">
+                  <span class="card-screen-id">[{{ item.screenId }}]</span>
+                  <span class="card-category">{{ item.provisionalCategory }}</span>
+                </div>
+                <div class="card-screen-title" [title]="item.screenTitle">{{ item.screenTitle }}</div>
+                <div class="card-filename" [title]="item.originalFilename">{{ item.importedFilename }}</div>
+                <div class="card-specs-row">
+                  <span class="card-dims">{{ item.width }}×{{ item.height }}</span>
+                  <span class="card-ratio">{{ item.aspectRatioLabel }}</span>
+                  <span class="card-status">✓ Verified</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Single Full-Size Asset Inspection Modal -->
+  @if (selectedPreviewAsset(); as preview) {
+    <div class="asset-detail-backdrop" (click)="closeAssetDetail()">
+      <div class="asset-detail-card" (click)="$event.stopPropagation()">
+        <div class="detail-header">
+          <div class="detail-info">
+            <span class="detail-screen-id">[{{ preview.screenId }}]</span>
+            <span class="detail-title">{{ preview.screenTitle }}</span>
+            <span class="detail-cat-badge">{{ preview.module | uppercase }} • {{ preview.provisionalCategory }}</span>
+          </div>
+          <button type="button" class="btn-close-detail" (click)="closeAssetDetail()">✕</button>
+        </div>
+        
+        <div class="detail-body">
+          <div class="detail-preview-frame">
+            <img [src]="preview.publicAssetUrl" [alt]="preview.screenTitle" class="detail-img" />
+          </div>
+          
+          <div class="detail-meta-panel">
+            <div class="meta-row"><strong>Original Name:</strong> <span>{{ preview.originalFilename }}</span></div>
+            <div class="meta-row"><strong>Imported Name:</strong> <span>{{ preview.importedFilename }}</span></div>
+            <div class="meta-row"><strong>Public Path:</strong> <code>{{ preview.publicAssetUrl }}</code></div>
+            <div class="meta-row"><strong>Dimensions:</strong> <span>{{ preview.width }} × {{ preview.height }} px</span></div>
+            <div class="meta-row"><strong>Aspect Ratio:</strong> <span>{{ preview.aspectRatioLabel }} ({{ preview.aspectRatio }})</span></div>
+            <div class="meta-row"><strong>File Size:</strong> <span>{{ (preview.fileSize / 1024).toFixed(1) }} KB</span></div>
+            <div class="meta-row"><strong>SHA-256:</strong> <span class="hash-text">{{ preview.sha256 }}</span></div>
+            <div class="meta-row"><strong>Duplicate Status:</strong> <span>{{ preview.duplicateIndicator }}</span></div>
+            <div class="meta-row"><strong>Verification:</strong> <span class="status-ok">Valid PNG Header • Byte Integrity Confirmed</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
