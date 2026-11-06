@@ -40,6 +40,27 @@
               </option>
             }
           </optgroup>
+          <optgroup label="Learning Module (Q01-Q09)">
+            @for (s of learningScreens(); track s.id) {
+              <option [value]="s.route">
+                [{{ s.code }}] {{ s.title }}
+              </option>
+            }
+          </optgroup>
+          <optgroup label="Hobbies Module (H01-H37)">
+            @for (s of hobbiesScreens(); track s.id) {
+              <option [value]="s.route">
+                [{{ s.code }}] {{ s.title }}
+              </option>
+            }
+          </optgroup>
+          <optgroup label="Social Module 18+ (SOC-OPT to S21)">
+            @for (s of socialScreens(); track s.id) {
+              <option [value]="s.route">
+                [{{ s.code }}] {{ s.title }}
+              </option>
+            }
+          </optgroup>
         </select>
       </div>
 

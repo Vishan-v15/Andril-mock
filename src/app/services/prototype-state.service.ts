@@ -1,6 +1,15 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AppLanguage, DEMO_STATES, DemoStateDefinition, ModuleId, UserSession } from '../models/andril.models';
+import {
+  AppLanguage,
+  DEMO_STATES,
+  DemoStateDefinition,
+  HobbiesProfile,
+  LearningProfile,
+  ModuleId,
+  SocialProfile,
+  UserSession
+} from '../models/andril.models';
 
 export interface ToastMessage {
   id: number;
@@ -24,10 +33,11 @@ const DEFAULT_SESSION: UserSession = {
   is18Plus: true,
   termsAccepted: true,
   privacyAccepted: true,
+  activeModule: 'learning',
   modules: {
     learning: true,
-    hobbies: false,
-    social: false
+    hobbies: true,
+    social: true
   },
   premium: {
     active: false,
@@ -40,6 +50,78 @@ const DEFAULT_SESSION: UserSession = {
   referralCode: 'ANDRIL-ALEX-7892'
 };
 
+const DEFAULT_LEARNING_PROFILE: LearningProfile = {
+  handle: '@alex_learns',
+  displayName: 'Alex Rivera',
+  bio: 'Full-stack developer eager to learn machine learning & distributed systems.',
+  avatarUrl: 'assets/andril/learning/Q03_LUC-02_My_Learning_Profile_-_Owner_View.png',
+  skillsOffered: ['TypeScript / Angular', 'Cloud Architecture'],
+  skillsSought: ['Python / Data Science', 'Neural Networks', 'Distributed Systems'],
+  learningGoals: ['Master Neural Networks', 'Build Distributed Systems', 'Read 2 Research Papers / week'],
+  weeklyHours: 6,
+  learningStyle: 'Self-Paced',
+  xp: 450,
+  level: 3,
+  levelTitle: 'Dedicated Scholar',
+  streakDays: 12,
+  partnersCount: 5,
+  classroomsCount: 2,
+  isSetupComplete: true,
+  privacy: {
+    isPublic: true,
+    showHandleOnly: false,
+    allowMatching: true
+  }
+};
+
+const DEFAULT_HOBBIES_PROFILE: HobbiesProfile = {
+  handle: '@alex_hobbies',
+  displayName: 'Alex Rivera',
+  bio: 'Passionate about landscape photography, trail hiking, and urban sketching.',
+  avatarUrl: 'assets/andril/hobbies/H10_My_Hobbies_Profile.png',
+  interests: ['Photography', 'Hiking', 'Urban Sketching', 'Coffee Brewing'],
+  skillLevel: 'Enthusiast',
+  flightPoints: 820,
+  level: 4,
+  levelTitle: 'Trail Explorer',
+  clubsCount: 8,
+  mapContributions: 3,
+  isSetupComplete: true,
+  privacy: {
+    visibleInClubs: true,
+    locationSharing: 'City Level',
+    allowDirectMessages: true
+  }
+};
+
+const DEFAULT_SOCIAL_PROFILE: SocialProfile = {
+  handle: '@alex_social',
+  displayName: 'Alex R.',
+  bio: 'Creative techie, indie music lover, weekend coffee explorer. Let us connect!',
+  avatarUrl: 'assets/andril/social/S20_My_Social_Profile.png',
+  ageVerified: true,
+  optInAccepted: true,
+  lookingFor: ['Friendships', 'Activity Buddies', 'Casual Dating'],
+  moodTone: 'Creative & Chill',
+  personalityAnswers: {
+    chronotype: 'Night Owl',
+    conversationStyle: 'Deep Conversations',
+    beveragePreference: 'Coffee',
+    weekendVibe: 'Spontaneous'
+  },
+  socialSparkXp: 310,
+  level: 2,
+  levelTitle: 'Vibrant Connector',
+  matchesCount: 6,
+  activeChatsCount: 2,
+  isSetupComplete: true,
+  privacy: {
+    incognitoMode: false,
+    strictAgeFilter: true,
+    connectionsOnlyVisibility: false
+  }
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -47,6 +129,14 @@ export class PrototypeStateService {
   readonly session = signal<UserSession>({ ...DEFAULT_SESSION });
   readonly toasts = signal<ToastMessage[]>([]);
   readonly placeholderModal = signal<PlaceholderModalInfo | null>(null);
+
+  // Independent module profiles (Cross-Module Privacy Isolation)
+  readonly learningProfile = signal<LearningProfile>({ ...DEFAULT_LEARNING_PROFILE });
+  readonly hobbiesProfile = signal<HobbiesProfile>({ ...DEFAULT_HOBBIES_PROFILE });
+  readonly socialProfile = signal<SocialProfile>({ ...DEFAULT_SOCIAL_PROFILE });
+
+  // Currently viewed module
+  readonly activeModule = signal<ModuleId>('learning');
 
   // Active Demo State selector signal
   readonly activeDemoState = signal<string | null>(null);
@@ -330,8 +420,132 @@ export class PrototypeStateService {
     }
   }
 
+  // ==========================================
+  // PHASE 4 / PART 2: MODULE ONBOARDING & SWITCHING
+  // ==========================================
+  proceedFromModuleSelection() {
+    const s = this.session().modules;
+    if (s.learning) {
+      this.activeModule.set('learning');
+      this.showToast('Starting Learning module setup...', 'info');
+      this.router.navigate(['/modules/learning/welcome']);
+    } else if (s.hobbies) {
+      this.activeModule.set('hobbies');
+      this.showToast('Starting Hobbies module setup...', 'info');
+      this.router.navigate(['/modules/hobbies/profile']);
+    } else if (s.social) {
+      if (!this.session().is18Plus) {
+        this.showToast('Social module requires age 18+ eligibility.', 'warning');
+        this.router.navigate(['/onboarding/modules']);
+        return;
+      }
+      this.activeModule.set('social');
+      this.showToast('Starting Social 18+ verification and opt-in...', 'info');
+      this.router.navigate(['/modules/social/opt-in']);
+    } else {
+      this.showToast('Please activate at least one module to continue.', 'warning');
+    }
+  }
+
+  switchToModule(mod: ModuleId) {
+    const s = this.session();
+    if (!s.modules[mod]) {
+      this.showToast(`${mod.charAt(0).toUpperCase() + mod.slice(1)} module is currently inactive. You can enable it in Settings.`, 'warning');
+      return;
+    }
+
+    if (mod === 'social') {
+      if (!s.is18Plus) {
+        this.showToast('Social module is restricted to users 18 years of age or older.', 'warning');
+        return;
+      }
+      if (!this.socialProfile().optInAccepted) {
+        this.activeModule.set('social');
+        this.router.navigate(['/modules/social/opt-in']);
+        return;
+      }
+    }
+
+    this.activeModule.set(mod);
+    switch (mod) {
+      case 'learning':
+        this.router.navigate(['/modules/learning/home']);
+        break;
+      case 'hobbies':
+        this.router.navigate(['/modules/hobbies/home']);
+        break;
+      case 'social':
+        this.router.navigate(['/modules/social/home']);
+        break;
+    }
+  }
+
+  updateLearningProfile(updates: Partial<LearningProfile>) {
+    this.learningProfile.update(current => ({ ...current, ...updates }));
+  }
+
+  completeLearningSetup() {
+    this.learningProfile.update(p => ({
+      ...p,
+      isSetupComplete: true,
+      xp: p.xp + 100
+    }));
+    this.activeModule.set('learning');
+    this.showToast('Learning profile saved! +100 XP awarded. Welcome to Learning Home!', 'success');
+    this.router.navigate(['/modules/learning/home']);
+  }
+
+  updateHobbiesProfile(updates: Partial<HobbiesProfile>) {
+    this.hobbiesProfile.update(current => ({ ...current, ...updates }));
+  }
+
+  completeHobbiesSetup() {
+    this.hobbiesProfile.update(p => ({
+      ...p,
+      isSetupComplete: true,
+      flightPoints: p.flightPoints + 100
+    }));
+    this.activeModule.set('hobbies');
+    this.showToast('Hobbies profile saved! +100 Flight Points awarded. Welcome to Hobbies Home!', 'success');
+    this.router.navigate(['/modules/hobbies/home']);
+  }
+
+  optInSocial() {
+    if (!this.session().is18Plus) {
+      this.showToast('Social module requires age 18+ verification.', 'warning');
+      return false;
+    }
+    this.socialProfile.update(p => ({
+      ...p,
+      ageVerified: true,
+      optInAccepted: true
+    }));
+    this.showToast('18+ Verification & Social Opt-in confirmed.', 'success');
+    this.router.navigate(['/modules/social/profile']);
+    return true;
+  }
+
+  updateSocialProfile(updates: Partial<SocialProfile>) {
+    this.socialProfile.update(current => ({ ...current, ...updates }));
+  }
+
+  completeSocialSetup() {
+    this.socialProfile.update(p => ({
+      ...p,
+      isSetupComplete: true,
+      socialSparkXp: p.socialSparkXp + 100
+    }));
+    this.activeModule.set('social');
+    this.showToast('Social profile saved! +100 Social Spark awarded. Welcome to Social Home!', 'success');
+    this.router.navigate(['/modules/social/home']);
+  }
+
   resetDemoSession() {
     this.session.set({ ...DEFAULT_SESSION });
+    this.learningProfile.set({ ...DEFAULT_LEARNING_PROFILE });
+    this.hobbiesProfile.set({ ...DEFAULT_HOBBIES_PROFILE });
+    this.socialProfile.set({ ...DEFAULT_SOCIAL_PROFILE });
+    this.activeModule.set('learning');
     this.activeDemoState.set(null);
     this.deactivationModalModule.set(null);
     this.blockDialogUser.set(null);

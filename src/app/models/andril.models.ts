@@ -12,6 +12,78 @@ export interface ModuleState {
   daysRemaining?: number;
 }
 
+export interface LearningProfile {
+  handle: string;
+  displayName: string;
+  bio: string;
+  avatarUrl: string;
+  skillsOffered: string[];
+  skillsSought: string[];
+  learningGoals: string[];
+  weeklyHours: number;
+  learningStyle: 'Self-Paced' | 'Peer Exchange' | 'Mentorship';
+  xp: number;
+  level: number;
+  levelTitle: string;
+  streakDays: number;
+  partnersCount: number;
+  classroomsCount: number;
+  isSetupComplete: boolean;
+  privacy: {
+    isPublic: boolean;
+    showHandleOnly: boolean;
+    allowMatching: boolean;
+  };
+}
+
+export interface HobbiesProfile {
+  handle: string;
+  displayName: string;
+  bio: string;
+  avatarUrl: string;
+  interests: string[];
+  skillLevel: 'Beginner' | 'Enthusiast' | 'Expert';
+  flightPoints: number;
+  level: number;
+  levelTitle: string;
+  clubsCount: number;
+  mapContributions: number;
+  isSetupComplete: boolean;
+  privacy: {
+    visibleInClubs: boolean;
+    locationSharing: 'City Level' | 'Neighborhood' | 'Hidden';
+    allowDirectMessages: boolean;
+  };
+}
+
+export interface SocialProfile {
+  handle: string;
+  displayName: string;
+  bio: string;
+  avatarUrl: string;
+  ageVerified: boolean;
+  optInAccepted: boolean;
+  lookingFor: string[];
+  moodTone: string;
+  personalityAnswers: {
+    chronotype: 'Night Owl' | 'Early Bird';
+    conversationStyle: 'Deep Conversations' | 'Casual Banter';
+    beveragePreference: 'Coffee' | 'Tea';
+    weekendVibe: 'Spontaneous' | 'Planned';
+  };
+  socialSparkXp: number;
+  level: number;
+  levelTitle: string;
+  matchesCount: number;
+  activeChatsCount: number;
+  isSetupComplete: boolean;
+  privacy: {
+    incognitoMode: boolean;
+    strictAgeFilter: boolean;
+    connectionsOnlyVisibility: boolean;
+  };
+}
+
 export interface UserSession {
   isLoggedIn: boolean;
   email: string;
@@ -21,6 +93,7 @@ export interface UserSession {
   is18Plus: boolean;
   termsAccepted: boolean;
   privacyAccepted: boolean;
+  activeModule?: ModuleId;
   modules: {
     learning: boolean;
     hobbies: boolean;
@@ -45,7 +118,7 @@ export interface ScreenInfo {
   code: string;
   title: string;
   route: string;
-  category: 'onboarding' | 'settings' | 'auth';
+  category: 'onboarding' | 'settings' | 'auth' | 'learning' | 'hobbies' | 'social';
   imagePath: string;
   backRoute?: string;
   defaultNextRoute?: string;

@@ -1607,5 +1607,768 @@
       </button>
     }
 
+    <!-- ============================================================== -->
+    <!-- PERSISTENT MODULE SWITCHER BAR (All Module Screens)             -->
+    <!-- ============================================================== -->
+    @if (currentScreen().category === 'learning' || currentScreen().category === 'hobbies' || currentScreen().category === 'social') {
+      <div class="module-switcher-bar">
+        <button 
+          type="button" 
+          class="mod-switch-pill" 
+          [class.active]="currentScreen().category === 'learning'"
+          (click)="switchModule('learning')">
+          <span class="mod-icon">🎓</span>
+          <span class="mod-label">Learning</span>
+        </button>
+        <button 
+          type="button" 
+          class="mod-switch-pill" 
+          [class.active]="currentScreen().category === 'hobbies'"
+          (click)="switchModule('hobbies')">
+          <span class="mod-icon">🎨</span>
+          <span class="mod-label">Hobbies</span>
+        </button>
+        <button 
+          type="button" 
+          class="mod-switch-pill" 
+          [class.active]="currentScreen().category === 'social'"
+          (click)="switchModule('social')">
+          <span class="mod-icon">💬</span>
+          <span class="mod-label">Social</span>
+          @if (!state.session().is18Plus) {
+            <span class="lock-badge">18+</span>
+          }
+        </button>
+        <button 
+          type="button" 
+          class="mod-switch-settings" 
+          routerLink="/settings"
+          title="Account Settings">
+          ⚙️
+        </button>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN Q01: Learning Welcome (/modules/learning/welcome)       -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'Q01') {
+      <div class="module-onboarding-card card-bottom">
+        <div class="mod-card-header">
+          <div class="badge-icon">🎓</div>
+          <div>
+            <h3>Welcome to Learning</h3>
+            <p>Exchange knowledge, discover study partners, and earn verified XP.</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          class="primary-btn" 
+          routerLink="/modules/learning/profile">
+          <span>Start Learning Profile Setup</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN Q02: Create Learning Profile (/modules/learning/profile) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'Q02') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 1 of 3</span>
+            <h3>Create Learning Profile</h3>
+            <p>Independent identity isolated from Hobbies & Social.</p>
+          </div>
+
+          <div class="form-group">
+            <label>Learning Handle</label>
+            <div class="input-wrap">
+              <span class="prefix">@</span>
+              <input 
+                type="text" 
+                [ngModel]="lrnHandle()" 
+                (ngModelChange)="lrnHandle.set($event)"
+                placeholder="alex_learns"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Display Name</label>
+            <input 
+              type="text" 
+              [ngModel]="lrnDisplayName()" 
+              (ngModelChange)="lrnDisplayName.set($event)"
+              placeholder="Alex Rivera"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Field of Study & Bio</label>
+            <textarea 
+              rows="2"
+              [ngModel]="lrnBio()" 
+              (ngModelChange)="lrnBio.set($event)"
+              placeholder="What are you excited to learn?">
+            </textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Primary Skill Offered</label>
+            <input 
+              type="text" 
+              [ngModel]="lrnSkillOffered()" 
+              (ngModelChange)="lrnSkillOffered.set($event)"
+              placeholder="e.g. TypeScript / Angular"
+            />
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn" 
+            (click)="saveLearningProfileAndContinue()">
+            <span>Save & Choose Skills</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN Q05 / Q06: Skills & Learning Goals (/modules/learning/skills) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'Q05' || currentScreen().code === 'Q06') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 2 of 3</span>
+            <h3>Skills & Learning Goals</h3>
+            <p>Select what you want to master.</p>
+          </div>
+
+          <div class="chips-container">
+            <label>Skills to Learn</label>
+            <div class="chip-row">
+              @for (skill of ['Neural Networks', 'Distributed Systems', 'Python & Data', 'UI/UX Design', 'Cloud Architecture', 'Rust']; track skill) {
+                <button 
+                  type="button" 
+                  class="chip" 
+                  [class.selected]="lrnSkillsToLearn().includes(skill)"
+                  (click)="toggleLearnSkill(skill)">
+                  {{ skill }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Weekly Commitment (Hours: {{ lrnWeeklyHours() }}h/week)</label>
+            <div class="pill-selector">
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="lrnWeeklyHours() === 4"
+                (click)="lrnWeeklyHours.set(4)">4h</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="lrnWeeklyHours() === 6"
+                (click)="lrnWeeklyHours.set(6)">6h</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="lrnWeeklyHours() === 8"
+                (click)="lrnWeeklyHours.set(8)">8h</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Preferred Learning Format</label>
+            <div class="pill-selector">
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="lrnStyle() === 'Self-Paced'"
+                (click)="lrnStyle.set('Self-Paced')">Self-Paced</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="lrnStyle() === 'Peer Exchange'"
+                (click)="lrnStyle.set('Peer Exchange')">Peer Exchange</button>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn" 
+            (click)="saveLearningSkillsAndContinue()">
+            <span>Continue to Preferences</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN Q07: Learning Preferences Setup (/modules/learning/preferences) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'Q07') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 3 of 3</span>
+            <h3>Learning Preferences & Privacy</h3>
+            <p>Customize your learning visibility.</p>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Public to Fellow Learners</strong>
+              <p>Allow other learners to discover your profile for study sessions.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn" 
+              [class.on]="lrnPublicProfile()"
+              (click)="lrnPublicProfile.set(!lrnPublicProfile())">
+            </button>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Display Handle Only</strong>
+              <p>Keep your real name hidden; display @alex_learns only.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn" 
+              [class.on]="lrnShowHandleOnly()"
+              (click)="lrnShowHandleOnly.set(!lrnShowHandleOnly())">
+            </button>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Partner Match Recommendations</strong>
+              <p>Receive suggested study partners based on skills.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn" 
+              [class.on]="lrnAllowMatching()"
+              (click)="lrnAllowMatching.set(!lrnAllowMatching())">
+            </button>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn highlight" 
+            (click)="finishLearningSetup()">
+            <span>Complete Setup & Enter Learning</span>
+            <span class="btn-arrow">🎉</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN Q09: Learning Home (/modules/learning/home)             -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'Q09') {
+      <!-- Active Profile Banner -->
+      <div class="module-hero-status">
+        <div class="status-left">
+          <span class="avatar-ring">🎓</span>
+          <div>
+            <strong>{{ state.learningProfile().displayName }}</strong>
+            <span class="handle-text">{{ state.learningProfile().handle }}</span>
+          </div>
+        </div>
+        <div class="status-right">
+          <span class="xp-badge">⚡ {{ state.learningProfile().xp }} XP</span>
+          <span class="level-sub">Level {{ state.learningProfile().level }} Scholar</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Hotspots -->
+      <button 
+        type="button" 
+        class="hotspot lrn-partner-hotspot" 
+        (click)="state.showToast('Opening Partner Explorer (Q12)...', 'info')"
+        title="Find Study Partner">
+      </button>
+
+      <!-- Multi-module next setup banner if Hobbies is enabled -->
+      @if (state.session().modules.hobbies && !state.hobbiesProfile().isSetupComplete) {
+        <div class="next-module-banner" routerLink="/modules/hobbies/profile">
+          <span>🎨 Hobbies space is active — Tap to configure your Hobbies profile →</span>
+        </div>
+      }
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN H10: My Hobbies Profile (/modules/hobbies/profile)       -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'H10') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 1 of 3</span>
+            <h3>Create Hobbies Profile</h3>
+            <p>Your creative and leisure persona on ANDRIL.</p>
+          </div>
+
+          <div class="form-group">
+            <label>Hobbies Handle</label>
+            <div class="input-wrap">
+              <span class="prefix">@</span>
+              <input 
+                type="text" 
+                [ngModel]="hobHandle()" 
+                (ngModelChange)="hobHandle.set($event)"
+                placeholder="alex_hobbies"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Display Name</label>
+            <input 
+              type="text" 
+              [ngModel]="hobDisplayName()" 
+              (ngModelChange)="hobDisplayName.set($event)"
+              placeholder="Alex Rivera"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Hobbies Bio</label>
+            <textarea 
+              rows="2"
+              [ngModel]="hobBio()" 
+              (ngModelChange)="hobBio.set($event)"
+              placeholder="Tell others what you love doing in your free time!">
+            </textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Experience Level</label>
+            <div class="pill-selector">
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="hobSkillLevel() === 'Beginner'"
+                (click)="hobSkillLevel.set('Beginner')">Beginner</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="hobSkillLevel() === 'Enthusiast'"
+                (click)="hobSkillLevel.set('Enthusiast')">Enthusiast</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="hobSkillLevel() === 'Expert'"
+                (click)="hobSkillLevel.set('Expert')">Expert</button>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn" 
+            (click)="saveHobbiesProfileAndContinue()">
+            <span>Save & Choose Interests</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN H02: Explore Hobbies & Interests (/modules/hobbies/interests) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'H02') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 2 of 3</span>
+            <h3>Select Your Interests</h3>
+            <p>Pick the activities and clubs you want to join.</p>
+          </div>
+
+          <div class="chips-container">
+            <div class="chip-row">
+              @for (interest of ['Photography', 'Hiking', 'Urban Sketching', 'Coffee Brewing', 'Gaming', 'Cycling', 'Cooking', 'Gardening', 'Music Production']; track interest) {
+                <button 
+                  type="button" 
+                  class="chip" 
+                  [class.selected]="hobInterests().includes(interest)"
+                  (click)="toggleHobbyInterest(interest)">
+                  {{ interest }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn" 
+            (click)="saveHobbiesInterestsAndContinue()">
+            <span>Continue to Privacy & Settings</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN H37: Hobbies Privacy & Preferences (/modules/hobbies/preferences) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'H37') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 3 of 3</span>
+            <h3>Hobbies Privacy & Preferences</h3>
+            <p>Set how you appear in clubs and maps.</p>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Visible in Club Directories</strong>
+              <p>Allow members of your joined clubs to see your profile.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn" 
+              [class.on]="hobVisibleInClubs()"
+              (click)="hobVisibleInClubs.set(!hobVisibleInClubs())">
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label>Map Location Precision</label>
+            <div class="pill-selector">
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="hobLocationSharing() === 'City Level'"
+                (click)="hobLocationSharing.set('City Level')">City Level</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="hobLocationSharing() === 'Neighborhood'"
+                (click)="hobLocationSharing.set('Neighborhood')">Neighborhood</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="hobLocationSharing() === 'Hidden'"
+                (click)="hobLocationSharing.set('Hidden')">Hidden</button>
+            </div>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Allow Direct Club Messages</strong>
+              <p>Receive activity invitations from verified club peers.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn" 
+              [class.on]="hobDirectMessages()"
+              (click)="hobDirectMessages.set(!hobDirectMessages())">
+            </button>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn highlight" 
+            (click)="finishHobbiesSetup()">
+            <span>Complete Setup & Enter Hobbies</span>
+            <span class="btn-arrow">🏕️</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN H01: Hobbies Home (/modules/hobbies/home)               -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'H01') {
+      <!-- Active Profile Banner -->
+      <div class="module-hero-status hobbies-theme">
+        <div class="status-left">
+          <span class="avatar-ring">🎨</span>
+          <div>
+            <strong>{{ state.hobbiesProfile().displayName }}</strong>
+            <span class="handle-text">{{ state.hobbiesProfile().handle }}</span>
+          </div>
+        </div>
+        <div class="status-right">
+          <span class="xp-badge">📍 {{ state.hobbiesProfile().flightPoints }} FP</span>
+          <span class="level-sub">Level {{ state.hobbiesProfile().level }} Explorer</span>
+        </div>
+      </div>
+
+      <!-- Quick Hotspot -->
+      <button 
+        type="button" 
+        class="hotspot hob-club-hotspot" 
+        (click)="state.showToast('Opening Clubs Hub (H11)...', 'info')"
+        title="Explore Clubs">
+      </button>
+
+      <!-- Multi-module next setup banner if Social is enabled -->
+      @if (state.session().modules.social && state.session().is18Plus && !state.socialProfile().optInAccepted) {
+        <div class="next-module-banner" routerLink="/modules/social/opt-in">
+          <span>💬 Social space is ready — Tap to verify 18+ and opt in →</span>
+        </div>
+      }
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN SOC-OPT: Social 18+ Verification & Opt-In (/modules/social/opt-in) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'SOC-OPT') {
+      <div class="social-optin-screen">
+        <div class="optin-header">
+          <div class="social-logo-badge">
+            <span class="icon">💬</span>
+            <span class="age-stamp">18+</span>
+          </div>
+          <h2>Social Module</h2>
+          <p class="optin-subtitle">Opt-in Community for Adults (18+)</p>
+        </div>
+
+        @if (!state.session().is18Plus) {
+          <!-- Underage Restriction Notice -->
+          <div class="age-block-card">
+            <span class="block-icon">⚠️</span>
+            <h3>Age Restriction Notice</h3>
+            <p>The ANDRIL Social module is strictly restricted to verified adults aged 18 and older. Your registered profile does not meet this requirement.</p>
+            <p class="sub-text">You can continue to enjoy the Learning and Hobbies modules with full access.</p>
+            <button 
+              type="button" 
+              class="primary-btn" 
+              routerLink="/modules/learning/home">
+              <span>Return to Learning Home</span>
+            </button>
+          </div>
+        } @else {
+          <!-- 18+ Verified & Consent Card -->
+          <div class="optin-content-card">
+            <div class="verify-chip">
+              <span class="check">✓</span>
+              <span>18+ Age Verified (DOB: {{ state.session().dob || '2001-05-18' }})</span>
+            </div>
+
+            <div class="privacy-isolation-callout">
+              <strong>🔒 Strict Privacy Isolation</strong>
+              <p>Your Social profile is 100% separate from Learning and Hobbies. Your connections, messages, and matches in Social will NEVER be visible in your other module spaces.</p>
+            </div>
+
+            <div class="optin-terms">
+              <label class="check-row">
+                <input 
+                  type="checkbox" 
+                  [ngModel]="socAgeVerifiedCheck()" 
+                  (ngModelChange)="socAgeVerifiedCheck.set($event)"
+                />
+                <span>I confirm that I am at least 18 years of age and understand that Social is an adult connection community.</span>
+              </label>
+
+              <label class="check-row">
+                <input 
+                  type="checkbox" 
+                  [ngModel]="socOptInConsentCheck()" 
+                  (ngModelChange)="socOptInConsentCheck.set($event)"
+                />
+                <span>I voluntarily opt in to the Social module and agree to adhere to respectful community conduct standards.</span>
+              </label>
+            </div>
+
+            <button 
+              type="button" 
+              class="primary-btn highlight" 
+              [disabled]="!socAgeVerifiedCheck() || !socOptInConsentCheck()"
+              (click)="confirmSocialOptIn()">
+              <span>Confirm 18+ Opt-In & Create Profile</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN S32: Create Social Profile (/modules/social/profile)    -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'S32') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 1 of 2</span>
+            <h3>Create Social Profile</h3>
+            <p>Your independent social persona.</p>
+          </div>
+
+          <div class="form-group">
+            <label>Social Handle</label>
+            <div class="input-wrap">
+              <span class="prefix">@</span>
+              <input 
+                type="text" 
+                [ngModel]="socHandle()" 
+                (ngModelChange)="socHandle.set($event)"
+                placeholder="alex_social"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Display Name</label>
+            <input 
+              type="text" 
+              [ngModel]="socDisplayName()" 
+              (ngModelChange)="socDisplayName.set($event)"
+              placeholder="Alex R."
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Social Bio</label>
+            <textarea 
+              rows="2"
+              [ngModel]="socBio()" 
+              (ngModelChange)="socBio.set($event)"
+              placeholder="Creative techie, indie music lover, weekend coffee explorer. Let's chat!">
+            </textarea>
+          </div>
+
+          <div class="chips-container">
+            <label>Looking For</label>
+            <div class="chip-row">
+              @for (item of ['Friendships', 'Activity Buddies', 'Casual Dating', 'Deep Conversations']; track item) {
+                <button 
+                  type="button" 
+                  class="chip" 
+                  [class.selected]="socLookingFor().includes(item)"
+                  (click)="toggleSocialLookingFor(item)">
+                  {{ item }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn" 
+            (click)="saveSocialProfileAndContinue()">
+            <span>Save & Set MoodTone</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN S41: MoodTone & Personality (/modules/social/preferences) -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'S41') {
+      <div class="module-form-overlay">
+        <div class="form-sheet">
+          <div class="sheet-title">
+            <span class="step-num">Step 2 of 2</span>
+            <h3>MoodTone & Preferences</h3>
+            <p>Express your current vibe and match preferences.</p>
+          </div>
+
+          <div class="form-group">
+            <label>Current MoodTone</label>
+            <div class="pill-selector">
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="socMoodTone() === 'Creative & Chill'"
+                (click)="socMoodTone.set('Creative & Chill')">✨ Creative & Chill</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="socMoodTone() === 'Adventurous'"
+                (click)="socMoodTone.set('Adventurous')">🚀 Adventurous</button>
+              <button 
+                type="button" 
+                class="pill-opt" 
+                [class.active]="socMoodTone() === 'Curious'"
+                (click)="socMoodTone.set('Curious')">☕ Curious</button>
+            </div>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Strict 18+ Age Match Filter</strong>
+              <p>Enforce verified adult matching boundaries.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn on" 
+              disabled>
+            </button>
+          </div>
+
+          <div class="toggle-card">
+            <div>
+              <strong>Incognito Browsing Mode</strong>
+              <p>Browse profiles stealthily without showing up in recently viewed.</p>
+            </div>
+            <button 
+              type="button" 
+              class="switch-btn" 
+              [class.on]="socIncognito()"
+              (click)="socIncognito.set(!socIncognito())">
+            </button>
+          </div>
+
+          <button 
+            type="button" 
+            class="primary-btn highlight" 
+            (click)="finishSocialSetup()">
+            <span>Complete Setup & Enter Social</span>
+            <span class="btn-arrow">💬</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ============================================================== -->
+    <!-- SCREEN S21: Social Home (/modules/social/home)                 -->
+    <!-- ============================================================== -->
+    @if (currentScreen().code === 'S21') {
+      <!-- Active Profile Banner -->
+      <div class="module-hero-status social-theme">
+        <div class="status-left">
+          <span class="avatar-ring">💬</span>
+          <div>
+            <strong>{{ state.socialProfile().displayName }}</strong>
+            <span class="handle-text">{{ state.socialProfile().handle }}</span>
+          </div>
+        </div>
+        <div class="status-right">
+          <span class="xp-badge">💖 {{ state.socialProfile().socialSparkXp }} Spark</span>
+          <span class="level-sub">Level {{ state.socialProfile().level }} Connector</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Hotspot -->
+      <button 
+        type="button" 
+        class="hotspot soc-discover-hotspot" 
+        (click)="state.showToast('Opening Discover People (S09)...', 'info')"
+        title="Discover People">
+      </button>
+    }
+
   </div>
 </div>

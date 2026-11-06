@@ -134,6 +134,45 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
   // Debug visual hotspot guides
   showHotspotGuide = signal(false);
 
+  // ==========================================
+  // PHASE 4: LEARNING MODULE JOURNEY SIGNALS
+  // ==========================================
+  lrnHandle = signal('@alex_learns');
+  lrnDisplayName = signal('Alex Rivera');
+  lrnBio = signal('Full-stack developer eager to learn machine learning & distributed systems.');
+  lrnSkillOffered = signal('TypeScript / Angular');
+  lrnSkillsToLearn = signal<string[]>(['Neural Networks', 'Distributed Systems']);
+  lrnWeeklyHours = signal(6);
+  lrnStyle = signal<'Self-Paced' | 'Peer Exchange' | 'Mentorship'>('Self-Paced');
+  lrnPublicProfile = signal(true);
+  lrnShowHandleOnly = signal(false);
+  lrnAllowMatching = signal(true);
+
+  // ==========================================
+  // PHASE 4: HOBBIES MODULE JOURNEY SIGNALS
+  // ==========================================
+  hobHandle = signal('@alex_hobbies');
+  hobDisplayName = signal('Alex Rivera');
+  hobBio = signal('Passionate about landscape photography, trail hiking, and urban sketching.');
+  hobSkillLevel = signal<'Beginner' | 'Enthusiast' | 'Expert'>('Enthusiast');
+  hobInterests = signal<string[]>(['Photography', 'Hiking', 'Urban Sketching', 'Coffee Brewing']);
+  hobVisibleInClubs = signal(true);
+  hobLocationSharing = signal<'City Level' | 'Neighborhood' | 'Hidden'>('City Level');
+  hobDirectMessages = signal(true);
+
+  // ==========================================
+  // PHASE 4: SOCIAL MODULE JOURNEY SIGNALS
+  // ==========================================
+  socAgeVerifiedCheck = signal(false);
+  socOptInConsentCheck = signal(false);
+  socHandle = signal('@alex_social');
+  socDisplayName = signal('Alex R.');
+  socBio = signal('Creative techie, indie music lover, weekend coffee explorer. Let us connect!');
+  socLookingFor = signal<string[]>(['Friendships', 'Activity Buddies']);
+  socMoodTone = signal('Creative & Chill');
+  socIncognito = signal(false);
+  socStrictAge = signal(true);
+
   ngOnInit() {
     this.syncCurrentScreen();
     this.router.events.subscribe(() => {
@@ -532,8 +571,145 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
       this.modulesActivatingLoading.set(false);
       this.modulesConfirmModalOpen.set(false);
       this.state.showToast('Module spaces activated successfully!', 'success');
-      this.router.navigate(['/settings']);
+      this.state.proceedFromModuleSelection();
     }, 700);
+  }
+
+  // ==========================================
+  // PHASE 4: LEARNING MODULE JOURNEY HANDLERS
+  // ==========================================
+  toggleLearnSkill(skill: string) {
+    const current = this.lrnSkillsToLearn();
+    if (current.includes(skill)) {
+      this.lrnSkillsToLearn.set(current.filter(s => s !== skill));
+    } else {
+      this.lrnSkillsToLearn.set([...current, skill]);
+    }
+  }
+
+  saveLearningProfileAndContinue() {
+    this.state.updateLearningProfile({
+      handle: this.lrnHandle().trim() || '@alex_learns',
+      displayName: this.lrnDisplayName().trim() || 'Alex Rivera',
+      bio: this.lrnBio().trim(),
+      skillsOffered: [this.lrnSkillOffered().trim()]
+    });
+    this.state.showToast('Learning profile saved.', 'success');
+    this.router.navigate(['/modules/learning/skills']);
+  }
+
+  saveLearningSkillsAndContinue() {
+    this.state.updateLearningProfile({
+      skillsSought: this.lrnSkillsToLearn(),
+      weeklyHours: this.lrnWeeklyHours(),
+      learningStyle: this.lrnStyle()
+    });
+    this.state.showToast('Skills and commitment saved.', 'success');
+    this.router.navigate(['/modules/learning/preferences']);
+  }
+
+  finishLearningSetup() {
+    this.state.updateLearningProfile({
+      privacy: {
+        isPublic: this.lrnPublicProfile(),
+        showHandleOnly: this.lrnShowHandleOnly(),
+        allowMatching: this.lrnAllowMatching()
+      }
+    });
+    this.state.completeLearningSetup();
+  }
+
+  // ==========================================
+  // PHASE 4: HOBBIES MODULE JOURNEY HANDLERS
+  // ==========================================
+  toggleHobbyInterest(interest: string) {
+    const current = this.hobInterests();
+    if (current.includes(interest)) {
+      this.hobInterests.set(current.filter(i => i !== interest));
+    } else {
+      this.hobInterests.set([...current, interest]);
+    }
+  }
+
+  saveHobbiesProfileAndContinue() {
+    this.state.updateHobbiesProfile({
+      handle: this.hobHandle().trim() || '@alex_hobbies',
+      displayName: this.hobDisplayName().trim() || 'Alex Rivera',
+      bio: this.hobBio().trim(),
+      skillLevel: this.hobSkillLevel()
+    });
+    this.state.showToast('Hobbies profile saved.', 'success');
+    this.router.navigate(['/modules/hobbies/interests']);
+  }
+
+  saveHobbiesInterestsAndContinue() {
+    this.state.updateHobbiesProfile({
+      interests: this.hobInterests()
+    });
+    this.state.showToast('Hobby interests saved.', 'success');
+    this.router.navigate(['/modules/hobbies/preferences']);
+  }
+
+  finishHobbiesSetup() {
+    this.state.updateHobbiesProfile({
+      privacy: {
+        visibleInClubs: this.hobVisibleInClubs(),
+        locationSharing: this.hobLocationSharing(),
+        allowDirectMessages: this.hobDirectMessages()
+      }
+    });
+    this.state.completeHobbiesSetup();
+  }
+
+  // ==========================================
+  // PHASE 4: SOCIAL MODULE JOURNEY (18+ & OPT-IN)
+  // ==========================================
+  toggleSocialLookingFor(item: string) {
+    const current = this.socLookingFor();
+    if (current.includes(item)) {
+      this.socLookingFor.set(current.filter(x => x !== item));
+    } else {
+      this.socLookingFor.set([...current, item]);
+    }
+  }
+
+  confirmSocialOptIn() {
+    if (!this.socAgeVerifiedCheck() || !this.socOptInConsentCheck()) {
+      this.state.showToast('Please check both verification & consent boxes to opt in.', 'warning');
+      return;
+    }
+    const success = this.state.optInSocial();
+    if (success) {
+      this.router.navigate(['/modules/social/profile']);
+    }
+  }
+
+  saveSocialProfileAndContinue() {
+    this.state.updateSocialProfile({
+      handle: this.socHandle().trim() || '@alex_social',
+      displayName: this.socDisplayName().trim() || 'Alex R.',
+      bio: this.socBio().trim(),
+      lookingFor: this.socLookingFor()
+    });
+    this.state.showToast('Social profile saved.', 'success');
+    this.router.navigate(['/modules/social/preferences']);
+  }
+
+  finishSocialSetup() {
+    this.state.updateSocialProfile({
+      moodTone: this.socMoodTone(),
+      privacy: {
+        incognitoMode: this.socIncognito(),
+        strictAgeFilter: this.socStrictAge(),
+        connectionsOnlyVisibility: false
+      }
+    });
+    this.state.completeSocialSetup();
+  }
+
+  // Persistent Module Switcher
+  switchModule(mod: ModuleId) {
+    this.state.switchToModule(mod);
   }
 
   closeModulesConfirmModal() {

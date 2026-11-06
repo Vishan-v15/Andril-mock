@@ -68,7 +68,7 @@ export const SCREEN_REGISTRY: ScreenInfo[] = [
     category: 'onboarding',
     imagePath: 'assets/account creation and module select/07 Choose_Modules_No_Logo_1440x3120.png',
     backRoute: '/onboarding/eligibility',
-    defaultNextRoute: '/settings'
+    defaultNextRoute: '/modules/learning/welcome'
   },
   {
     id: 'scr-08',
@@ -207,6 +207,155 @@ export const SCREEN_REGISTRY: ScreenInfo[] = [
     category: 'settings',
     imagePath: 'assets/main account setting screen/SET-11_About_ANDRIL.png',
     backRoute: '/settings'
+  },
+
+  // ==============================================================
+  // PHASE 4 / PART 2 — BATCH 1: LEARNING MODULE JOURNEY
+  // ==============================================================
+  {
+    id: 'mod-lrn-01',
+    code: 'Q01',
+    title: 'Learning Welcome',
+    route: '/modules/learning/welcome',
+    category: 'learning',
+    imagePath: 'assets/andril/learning/Q01_LUC-01_Learning_Welcome.png',
+    backRoute: '/onboarding/modules',
+    defaultNextRoute: '/modules/learning/profile'
+  },
+  {
+    id: 'mod-lrn-02',
+    code: 'Q02',
+    title: 'Create Learning Profile',
+    route: '/modules/learning/profile',
+    category: 'learning',
+    imagePath: 'assets/andril/learning/Q02_LUC-02_Create_Learning_Profile.png',
+    backRoute: '/modules/learning/welcome',
+    defaultNextRoute: '/modules/learning/skills'
+  },
+  {
+    id: 'mod-lrn-03',
+    code: 'Q05',
+    title: 'Skills & Learning Goals',
+    route: '/modules/learning/skills',
+    category: 'learning',
+    imagePath: 'assets/andril/learning/Q05_LUC-03_Skills_and_Learning_Goals_Onboarding.png',
+    backRoute: '/modules/learning/profile',
+    defaultNextRoute: '/modules/learning/goals'
+  },
+  {
+    id: 'mod-lrn-04',
+    code: 'Q06',
+    title: 'Learning Goals Setup',
+    route: '/modules/learning/goals',
+    category: 'learning',
+    imagePath: 'assets/andril/learning/Q06_LUC-03_Learning_Goals_Setup.png',
+    backRoute: '/modules/learning/skills',
+    defaultNextRoute: '/modules/learning/preferences'
+  },
+  {
+    id: 'mod-lrn-05',
+    code: 'Q07',
+    title: 'Learning Preferences Setup',
+    route: '/modules/learning/preferences',
+    category: 'learning',
+    imagePath: 'assets/andril/learning/Q07_LUC-03_Learning_Preferences_Setup.png',
+    backRoute: '/modules/learning/goals',
+    defaultNextRoute: '/modules/learning/home'
+  },
+  {
+    id: 'mod-lrn-06',
+    code: 'Q09',
+    title: 'Learning Home',
+    route: '/modules/learning/home',
+    category: 'learning',
+    imagePath: 'assets/andril/learning/Q09_LUC-04_Learning_Home.png',
+    backRoute: '/onboarding/modules'
+  },
+
+  // ==============================================================
+  // PHASE 4 / PART 2 — BATCH 1: HOBBIES MODULE JOURNEY
+  // ==============================================================
+  {
+    id: 'mod-hob-01',
+    code: 'H10',
+    title: 'My Hobbies Profile',
+    route: '/modules/hobbies/profile',
+    category: 'hobbies',
+    imagePath: 'assets/andril/hobbies/H10_My_Hobbies_Profile.png',
+    backRoute: '/onboarding/modules',
+    defaultNextRoute: '/modules/hobbies/interests'
+  },
+  {
+    id: 'mod-hob-02',
+    code: 'H02',
+    title: 'Explore Hobbies & Interests',
+    route: '/modules/hobbies/interests',
+    category: 'hobbies',
+    imagePath: 'assets/andril/hobbies/H02_Explore_Hobbies.png',
+    backRoute: '/modules/hobbies/profile',
+    defaultNextRoute: '/modules/hobbies/preferences'
+  },
+  {
+    id: 'mod-hob-03',
+    code: 'H37',
+    title: 'Hobbies Privacy & Preferences',
+    route: '/modules/hobbies/preferences',
+    category: 'hobbies',
+    imagePath: 'assets/andril/hobbies/H37_Hobbies_Privacy.png',
+    backRoute: '/modules/hobbies/interests',
+    defaultNextRoute: '/modules/hobbies/home'
+  },
+  {
+    id: 'mod-hob-04',
+    code: 'H01',
+    title: 'Hobbies Home',
+    route: '/modules/hobbies/home',
+    category: 'hobbies',
+    imagePath: 'assets/andril/hobbies/H01_Hobbies_Home.png',
+    backRoute: '/onboarding/modules'
+  },
+
+  // ==============================================================
+  // PHASE 4 / PART 2 — BATCH 1: SOCIAL MODULE JOURNEY (18+ & OPT-IN)
+  // ==============================================================
+  {
+    id: 'mod-soc-01',
+    code: 'SOC-OPT',
+    title: 'Social 18+ Verification & Opt-In',
+    route: '/modules/social/opt-in',
+    category: 'social',
+    imagePath: 'assets/andril/social/S20_My_Social_Profile.png',
+    backRoute: '/onboarding/modules',
+    defaultNextRoute: '/modules/social/profile'
+  },
+  {
+    id: 'mod-soc-02',
+    code: 'S32',
+    title: 'Create Social Profile',
+    route: '/modules/social/profile',
+    category: 'social',
+    imagePath: 'assets/andril/social/S32_Edit_Social_Profile.png',
+    backRoute: '/modules/social/opt-in',
+    defaultNextRoute: '/modules/social/preferences'
+  },
+  {
+    id: 'mod-soc-03',
+    code: 'S41',
+    title: 'MoodTone & Personality Preferences',
+    route: '/modules/social/preferences',
+    category: 'social',
+    imagePath: 'assets/andril/social/S41_MoodTone_Selector.png',
+    backRoute: '/modules/social/profile',
+    defaultNextRoute: '/modules/social/home'
+  },
+  {
+    id: 'mod-soc-04',
+    code: 'S21',
+    title: 'Social Home',
+    route: '/modules/social/home',
+    category: 'social',
+    imagePath: 'assets/andril/social/S21_Social_Home.png',
+    backRoute: '/onboarding/modules'
   }
 ];
 

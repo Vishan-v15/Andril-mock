@@ -67,6 +67,9 @@ export class App {
   onboardingScreens = computed(() => this.screens.filter(s => s.category === 'onboarding'));
   authScreens = computed(() => this.screens.filter(s => s.category === 'auth'));
   settingsScreens = computed(() => this.screens.filter(s => s.category === 'settings'));
+  learningScreens = computed(() => this.screens.filter(s => s.category === 'learning'));
+  hobbiesScreens = computed(() => this.screens.filter(s => s.category === 'hobbies'));
+  socialScreens = computed(() => this.screens.filter(s => s.category === 'social'));
 
   demoStatesAuth = computed(() => this.demoStates.filter(d => d.category === 'auth'));
   demoStatesOnboarding = computed(() => this.demoStates.filter(d => d.category === 'onboarding'));
