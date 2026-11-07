@@ -1,5 +1,14 @@
 import { Routes } from '@angular/router';
 import { ScreenViewComponent } from './screens/screen-view.component';
+import {
+  learningActiveGuard,
+  learningHomeGuard,
+  hobbiesActiveGuard,
+  hobbiesHomeGuard,
+  socialOptInGuard,
+  socialSetupGuard,
+  socialHomeGuard
+} from './guards/module-access.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'splash', pathMatch: 'full' },
@@ -21,28 +30,28 @@ export const routes: Routes = [
   // ==========================================
   // PHASE 4: LEARNING MODULE JOURNEY
   // ==========================================
-  { path: 'modules/learning/welcome', component: ScreenViewComponent },
-  { path: 'modules/learning/profile', component: ScreenViewComponent },
-  { path: 'modules/learning/skills', component: ScreenViewComponent },
-  { path: 'modules/learning/goals', component: ScreenViewComponent },
-  { path: 'modules/learning/preferences', component: ScreenViewComponent },
-  { path: 'modules/learning/home', component: ScreenViewComponent },
+  { path: 'modules/learning/welcome', component: ScreenViewComponent, canActivate: [learningActiveGuard] },
+  { path: 'modules/learning/profile', component: ScreenViewComponent, canActivate: [learningActiveGuard] },
+  { path: 'modules/learning/skills', component: ScreenViewComponent, canActivate: [learningActiveGuard] },
+  { path: 'modules/learning/goals', component: ScreenViewComponent, canActivate: [learningActiveGuard] },
+  { path: 'modules/learning/preferences', component: ScreenViewComponent, canActivate: [learningActiveGuard] },
+  { path: 'modules/learning/home', component: ScreenViewComponent, canActivate: [learningHomeGuard] },
 
   // ==========================================
   // PHASE 4: HOBBIES MODULE JOURNEY
   // ==========================================
-  { path: 'modules/hobbies/profile', component: ScreenViewComponent },
-  { path: 'modules/hobbies/interests', component: ScreenViewComponent },
-  { path: 'modules/hobbies/preferences', component: ScreenViewComponent },
-  { path: 'modules/hobbies/home', component: ScreenViewComponent },
+  { path: 'modules/hobbies/profile', component: ScreenViewComponent, canActivate: [hobbiesActiveGuard] },
+  { path: 'modules/hobbies/interests', component: ScreenViewComponent, canActivate: [hobbiesActiveGuard] },
+  { path: 'modules/hobbies/preferences', component: ScreenViewComponent, canActivate: [hobbiesActiveGuard] },
+  { path: 'modules/hobbies/home', component: ScreenViewComponent, canActivate: [hobbiesHomeGuard] },
 
   // ==========================================
   // PHASE 4: SOCIAL MODULE JOURNEY (18+ & OPT-IN)
   // ==========================================
-  { path: 'modules/social/opt-in', component: ScreenViewComponent },
-  { path: 'modules/social/profile', component: ScreenViewComponent },
-  { path: 'modules/social/preferences', component: ScreenViewComponent },
-  { path: 'modules/social/home', component: ScreenViewComponent },
+  { path: 'modules/social/opt-in', component: ScreenViewComponent, canActivate: [socialOptInGuard] },
+  { path: 'modules/social/profile', component: ScreenViewComponent, canActivate: [socialSetupGuard] },
+  { path: 'modules/social/preferences', component: ScreenViewComponent, canActivate: [socialSetupGuard] },
+  { path: 'modules/social/home', component: ScreenViewComponent, canActivate: [socialHomeGuard] },
 
   // Shared Core Settings
   { path: 'settings', component: ScreenViewComponent },

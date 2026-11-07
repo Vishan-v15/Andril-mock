@@ -138,8 +138,8 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
   // PHASE 4: LEARNING MODULE JOURNEY SIGNALS
   // ==========================================
   lrnHandle = signal('@alex_learns');
-  lrnDisplayName = signal('Alex Rivera');
-  lrnBio = signal('Full-stack developer eager to learn machine learning & distributed systems.');
+  lrnDisplayName = signal('Alex Rivera (Learner)');
+  lrnBio = signal('Studying full-stack development and distributed systems.');
   lrnSkillOffered = signal('TypeScript / Angular');
   lrnSkillsToLearn = signal<string[]>(['Neural Networks', 'Distributed Systems']);
   lrnWeeklyHours = signal(6);
@@ -151,9 +151,9 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
   // ==========================================
   // PHASE 4: HOBBIES MODULE JOURNEY SIGNALS
   // ==========================================
-  hobHandle = signal('@alex_hobbies');
-  hobDisplayName = signal('Alex Rivera');
-  hobBio = signal('Passionate about landscape photography, trail hiking, and urban sketching.');
+  hobHandle = signal('@skye_hobbies');
+  hobDisplayName = signal('Morgan Skye (Creator)');
+  hobBio = signal('Weekend landscape photographer, outdoor camper, and urban sketcher.');
   hobSkillLevel = signal<'Beginner' | 'Enthusiast' | 'Expert'>('Enthusiast');
   hobInterests = signal<string[]>(['Photography', 'Hiking', 'Urban Sketching', 'Coffee Brewing']);
   hobVisibleInClubs = signal(true);
@@ -165,9 +165,9 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
   // ==========================================
   socAgeVerifiedCheck = signal(false);
   socOptInConsentCheck = signal(false);
-  socHandle = signal('@alex_social');
-  socDisplayName = signal('Alex R.');
-  socBio = signal('Creative techie, indie music lover, weekend coffee explorer. Let us connect!');
+  socHandle = signal('@jordan_connect');
+  socDisplayName = signal('Jordan K. (Social)');
+  socBio = signal('Indie acoustic fan, specialty coffee enthusiast, weekend explorer.');
   socLookingFor = signal<string[]>(['Friendships', 'Activity Buddies']);
   socMoodTone = signal('Creative & Chill');
   socIncognito = signal(false);
@@ -633,12 +633,12 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
 
   saveHobbiesProfileAndContinue() {
     this.state.updateHobbiesProfile({
-      handle: this.hobHandle().trim() || '@alex_hobbies',
-      displayName: this.hobDisplayName().trim() || 'Alex Rivera',
+      handle: this.hobHandle().trim() || '@skye_hobbies',
+      displayName: this.hobDisplayName().trim() || 'Morgan Skye (Creator)',
       bio: this.hobBio().trim(),
       skillLevel: this.hobSkillLevel()
     });
-    this.state.showToast('Hobbies profile saved.', 'success');
+    this.state.showToast('Hobbies profile saved (DEMO).', 'success');
     this.router.navigate(['/modules/hobbies/interests']);
   }
 
@@ -686,12 +686,12 @@ export class ScreenViewComponent implements OnInit, OnDestroy {
 
   saveSocialProfileAndContinue() {
     this.state.updateSocialProfile({
-      handle: this.socHandle().trim() || '@alex_social',
-      displayName: this.socDisplayName().trim() || 'Alex R.',
+      handle: this.socHandle().trim() || '@jordan_connect',
+      displayName: this.socDisplayName().trim() || 'Jordan K. (Social)',
       bio: this.socBio().trim(),
       lookingFor: this.socLookingFor()
     });
-    this.state.showToast('Social profile saved.', 'success');
+    this.state.showToast('Social profile saved (DEMO).', 'success');
     this.router.navigate(['/modules/social/preferences']);
   }
 

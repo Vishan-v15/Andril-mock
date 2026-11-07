@@ -1680,7 +1680,7 @@
           <div class="sheet-title">
             <span class="step-num">Step 1 of 3</span>
             <h3>Create Learning Profile</h3>
-            <p>Independent identity isolated from Hobbies & Social.</p>
+            <p>DEMO: Dedicated learning profile and study preferences.</p>
           </div>
 
           <div class="form-group">
@@ -1702,7 +1702,7 @@
               type="text" 
               [ngModel]="lrnDisplayName()" 
               (ngModelChange)="lrnDisplayName.set($event)"
-              placeholder="Alex Rivera"
+              placeholder="Alex Rivera (Learner)"
             />
           </div>
 
@@ -1867,8 +1867,13 @@
             type="button" 
             class="primary-btn highlight" 
             (click)="finishLearningSetup()">
-            <span>Complete Setup & Enter Learning</span>
-            <span class="btn-arrow">🎉</span>
+            @if (state.getNextIncompleteModule()) {
+              <span>Save & Continue to Next Setup (DEMO)</span>
+              <span class="btn-arrow">→</span>
+            } @else {
+              <span>Save & Enter Learning Home (DEMO)</span>
+              <span class="btn-arrow">→</span>
+            }
           </button>
         </div>
       </div>
@@ -1888,8 +1893,8 @@
           </div>
         </div>
         <div class="status-right">
-          <span class="xp-badge">⚡ {{ state.learningProfile().xp }} XP</span>
-          <span class="level-sub">Level {{ state.learningProfile().level }} Scholar</span>
+          <span class="xp-badge">DEMO: {{ state.learningProfile().xp }} XP</span>
+          <span class="level-sub">Level {{ state.learningProfile().level }} Scholar (Mock)</span>
         </div>
       </div>
 
@@ -1901,7 +1906,7 @@
         title="Find Study Partner">
       </button>
 
-      <!-- Multi-module next setup banner if Hobbies is enabled -->
+      <!-- Multi-module next setup banner if Hobbies is enabled and incomplete -->
       @if (state.session().modules.hobbies && !state.hobbiesProfile().isSetupComplete) {
         <div class="next-module-banner" routerLink="/modules/hobbies/profile">
           <span>🎨 Hobbies space is active — Tap to configure your Hobbies profile →</span>
@@ -1918,7 +1923,7 @@
           <div class="sheet-title">
             <span class="step-num">Step 1 of 3</span>
             <h3>Create Hobbies Profile</h3>
-            <p>Your creative and leisure persona on ANDRIL.</p>
+            <p>DEMO: Dedicated hobbies profile and creative interests.</p>
           </div>
 
           <div class="form-group">
@@ -1929,7 +1934,7 @@
                 type="text" 
                 [ngModel]="hobHandle()" 
                 (ngModelChange)="hobHandle.set($event)"
-                placeholder="alex_hobbies"
+                placeholder="skye_hobbies"
               />
             </div>
           </div>
@@ -1940,7 +1945,7 @@
               type="text" 
               [ngModel]="hobDisplayName()" 
               (ngModelChange)="hobDisplayName.set($event)"
-              placeholder="Alex Rivera"
+              placeholder="Morgan Skye (Creator)"
             />
           </div>
 
@@ -2086,8 +2091,13 @@
             type="button" 
             class="primary-btn highlight" 
             (click)="finishHobbiesSetup()">
-            <span>Complete Setup & Enter Hobbies</span>
-            <span class="btn-arrow">🏕️</span>
+            @if (state.getNextIncompleteModule()) {
+              <span>Save & Continue to Next Setup (DEMO)</span>
+              <span class="btn-arrow">→</span>
+            } @else {
+              <span>Save & Enter Hobbies Home (DEMO)</span>
+              <span class="btn-arrow">→</span>
+            }
           </button>
         </div>
       </div>
@@ -2107,8 +2117,8 @@
           </div>
         </div>
         <div class="status-right">
-          <span class="xp-badge">📍 {{ state.hobbiesProfile().flightPoints }} FP</span>
-          <span class="level-sub">Level {{ state.hobbiesProfile().level }} Explorer</span>
+          <span class="xp-badge">DEMO: {{ state.hobbiesProfile().flightPoints }} FP</span>
+          <span class="level-sub">Level {{ state.hobbiesProfile().level }} Explorer (Mock)</span>
         </div>
       </div>
 
@@ -2120,7 +2130,7 @@
         title="Explore Clubs">
       </button>
 
-      <!-- Multi-module next setup banner if Social is enabled -->
+      <!-- Multi-module next setup banner if Social is enabled and incomplete -->
       @if (state.session().modules.social && state.session().is18Plus && !state.socialProfile().optInAccepted) {
         <div class="next-module-banner" routerLink="/modules/social/opt-in">
           <span>💬 Social space is ready — Tap to verify 18+ and opt in →</span>
@@ -2161,12 +2171,12 @@
           <div class="optin-content-card">
             <div class="verify-chip">
               <span class="check">✓</span>
-              <span>18+ Age Verified (DOB: {{ state.session().dob || '2001-05-18' }})</span>
+              <span>DEMO: Age Verification (Mock DOB check: {{ state.session().dob || '2001-05-18' }})</span>
             </div>
 
             <div class="privacy-isolation-callout">
-              <strong>🔒 Strict Privacy Isolation</strong>
-              <p>Your Social profile is 100% separate from Learning and Hobbies. Your connections, messages, and matches in Social will NEVER be visible in your other module spaces.</p>
+              <strong>🔒 DEMO: Independent Profile Architecture</strong>
+              <p>Demonstration model: Each module maintains its own distinct public profile, preferences, and contacts. No automated cross-module data sharing.</p>
             </div>
 
             <div class="optin-terms">
@@ -2176,7 +2186,7 @@
                   [ngModel]="socAgeVerifiedCheck()" 
                   (ngModelChange)="socAgeVerifiedCheck.set($event)"
                 />
-                <span>I confirm that I am at least 18 years of age and understand that Social is an adult connection community.</span>
+                <span>I confirm that I am at least 18 years of age (DEMO mock confirmation).</span>
               </label>
 
               <label class="check-row">
@@ -2185,7 +2195,7 @@
                   [ngModel]="socOptInConsentCheck()" 
                   (ngModelChange)="socOptInConsentCheck.set($event)"
                 />
-                <span>I voluntarily opt in to the Social module and agree to adhere to respectful community conduct standards.</span>
+                <span>I voluntarily opt in to the Social demonstration module and agree to community standards.</span>
               </label>
             </div>
 
@@ -2194,7 +2204,7 @@
               class="primary-btn highlight" 
               [disabled]="!socAgeVerifiedCheck() || !socOptInConsentCheck()"
               (click)="confirmSocialOptIn()">
-              <span>Confirm 18+ Opt-In & Create Profile</span>
+              <span>Confirm 18+ Opt-In & Create Profile (DEMO)</span>
               <span class="btn-arrow">→</span>
             </button>
           </div>
@@ -2211,7 +2221,7 @@
           <div class="sheet-title">
             <span class="step-num">Step 1 of 2</span>
             <h3>Create Social Profile</h3>
-            <p>Your independent social persona.</p>
+            <p>DEMO: Dedicated social profile and connection preferences.</p>
           </div>
 
           <div class="form-group">
@@ -2222,7 +2232,7 @@
                 type="text" 
                 [ngModel]="socHandle()" 
                 (ngModelChange)="socHandle.set($event)"
-                placeholder="alex_social"
+                placeholder="jordan_connect"
               />
             </div>
           </div>
@@ -2233,7 +2243,7 @@
               type="text" 
               [ngModel]="socDisplayName()" 
               (ngModelChange)="socDisplayName.set($event)"
-              placeholder="Alex R."
+              placeholder="Jordan K. (Social)"
             />
           </div>
 
@@ -2243,7 +2253,7 @@
               rows="2"
               [ngModel]="socBio()" 
               (ngModelChange)="socBio.set($event)"
-              placeholder="Creative techie, indie music lover, weekend coffee explorer. Let's chat!">
+              placeholder="Indie acoustic fan, specialty coffee enthusiast, weekend explorer.">
             </textarea>
           </div>
 
@@ -2309,7 +2319,7 @@
           <div class="toggle-card">
             <div>
               <strong>Strict 18+ Age Match Filter</strong>
-              <p>Enforce verified adult matching boundaries.</p>
+              <p>Enforce verified adult matching boundaries (DEMO).</p>
             </div>
             <button 
               type="button" 
@@ -2335,8 +2345,8 @@
             type="button" 
             class="primary-btn highlight" 
             (click)="finishSocialSetup()">
-            <span>Complete Setup & Enter Social</span>
-            <span class="btn-arrow">💬</span>
+            <span>Save & Enter Social Home (DEMO)</span>
+            <span class="btn-arrow">→</span>
           </button>
         </div>
       </div>
@@ -2356,8 +2366,8 @@
           </div>
         </div>
         <div class="status-right">
-          <span class="xp-badge">💖 {{ state.socialProfile().socialSparkXp }} Spark</span>
-          <span class="level-sub">Level {{ state.socialProfile().level }} Connector</span>
+          <span class="xp-badge">DEMO: {{ state.socialProfile().socialSparkXp }} Spark</span>
+          <span class="level-sub">Level {{ state.socialProfile().level }} Connector (Mock)</span>
         </div>
       </div>
 

@@ -52,8 +52,8 @@ const DEFAULT_SESSION: UserSession = {
 
 const DEFAULT_LEARNING_PROFILE: LearningProfile = {
   handle: '@alex_learns',
-  displayName: 'Alex Rivera',
-  bio: 'Full-stack developer eager to learn machine learning & distributed systems.',
+  displayName: 'Alex Rivera (Learner)',
+  bio: 'Studying full-stack development and distributed systems.',
   avatarUrl: 'assets/andril/learning/Q03_LUC-02_My_Learning_Profile_-_Owner_View.png',
   skillsOffered: ['TypeScript / Angular', 'Cloud Architecture'],
   skillsSought: ['Python / Data Science', 'Neural Networks', 'Distributed Systems'],
@@ -75,9 +75,9 @@ const DEFAULT_LEARNING_PROFILE: LearningProfile = {
 };
 
 const DEFAULT_HOBBIES_PROFILE: HobbiesProfile = {
-  handle: '@alex_hobbies',
-  displayName: 'Alex Rivera',
-  bio: 'Passionate about landscape photography, trail hiking, and urban sketching.',
+  handle: '@skye_hobbies',
+  displayName: 'Morgan Skye (Creator)',
+  bio: 'Weekend landscape photographer, outdoor camper, and urban sketcher.',
   avatarUrl: 'assets/andril/hobbies/H10_My_Hobbies_Profile.png',
   interests: ['Photography', 'Hiking', 'Urban Sketching', 'Coffee Brewing'],
   skillLevel: 'Enthusiast',
@@ -95,9 +95,9 @@ const DEFAULT_HOBBIES_PROFILE: HobbiesProfile = {
 };
 
 const DEFAULT_SOCIAL_PROFILE: SocialProfile = {
-  handle: '@alex_social',
-  displayName: 'Alex R.',
-  bio: 'Creative techie, indie music lover, weekend coffee explorer. Let us connect!',
+  handle: '@jordan_connect',
+  displayName: 'Jordan K. (Social)',
+  bio: 'Indie acoustic fan, specialty coffee enthusiast, weekend explorer.',
   avatarUrl: 'assets/andril/social/S20_My_Social_Profile.png',
   ageVerified: true,
   optInAccepted: true,
@@ -313,6 +313,10 @@ export class PrototypeStateService {
       email,
       isLoggedIn: true
     }));
+    // Reset module setup completion flags for a new user onboarding journey
+    this.learningProfile.update(p => ({ ...p, isSetupComplete: false }));
+    this.hobbiesProfile.update(p => ({ ...p, isSetupComplete: false }));
+    this.socialProfile.update(p => ({ ...p, isSetupComplete: false, optInAccepted: false }));
   }
 
   login(email: string) {
@@ -423,61 +427,128 @@ export class PrototypeStateService {
   // ==========================================
   // PHASE 4 / PART 2: MODULE ONBOARDING & SWITCHING
   // ==========================================
+  getNextIncompleteModule(): ModuleId | null {
+    const s = this.session();
+    const mods = s.modules;
+
+    // 1. Check Learning
+    if (mods.learning && !this.learningProfile().isSetupComplete) {
+      return 'learning';
+    }
+
+    // 2. Check Hobbies
+    if (mods.hobbies && !this.hobbiesProfile().isSetupComplete) {
+      return 'hobbies';
+    }
+
+    // 3. Check Social (eligible only if 18+)
+    if (mods.social && s.is18Plus && !this.socialProfile().isSetupComplete) {
+      return 'social';
+    }
+
+    return null;
+  }
+
+  navigateToNextSetupOrHome(preferredHomeModule?: ModuleId) {
+    const nextIncomplete = this.getNextIncompleteModule();
+
+    if (nextIncomplete === 'learning') {
+      this.activeModule.set('learning');
+      this.showToast('Proceeding to Learning profile setup (DEMO)...', 'info');
+      this.router.navigate(['/modules/learning/welcome']);
+      return;
+    }
+
+    if (nextIncomplete === 'hobbies') {
+      this.activeModule.set('hobbies');
+      this.showToast('Proceeding to Hobbies profile setup (DEMO)...', 'info');
+      this.router.navigate(['/modules/hobbies/profile']);
+      return;
+    }
+
+    if (nextIncomplete === 'social') {
+      this.activeModule.set('social');
+      if (!this.socialProfile().optInAccepted) {
+        this.showToast('Proceeding to Social 18+ opt-in (DEMO)...', 'info');
+        this.router.navigate(['/modules/social/opt-in']);
+      } else {
+        this.showToast('Proceeding to Social profile setup (DEMO)...', 'info');
+        this.router.navigate(['/modules/social/profile']);
+      }
+      return;
+    }
+
+    // All active eligible modules are configured
+    const s = this.session();
+    let target = preferredHomeModule || this.activeModule();
+    if (!s.modules[target]) {
+      if (s.modules.learning) target = 'learning';
+      else if (s.modules.hobbies) target = 'hobbies';
+      else if (s.modules.social && s.is18Plus) target = 'social';
+      else target = 'learning';
+    }
+    this.activeModule.set(target);
+    this.showToast(`Selected module profiles configured (DEMO). Opening ${target.charAt(0).toUpperCase() + target.slice(1)} Home.`, 'success');
+    this.router.navigate([`/modules/${target}/home`]);
+  }
+
   proceedFromModuleSelection() {
     const s = this.session().modules;
-    if (s.learning) {
-      this.activeModule.set('learning');
-      this.showToast('Starting Learning module setup...', 'info');
-      this.router.navigate(['/modules/learning/welcome']);
-    } else if (s.hobbies) {
-      this.activeModule.set('hobbies');
-      this.showToast('Starting Hobbies module setup...', 'info');
-      this.router.navigate(['/modules/hobbies/profile']);
-    } else if (s.social) {
-      if (!this.session().is18Plus) {
-        this.showToast('Social module requires age 18+ eligibility.', 'warning');
-        this.router.navigate(['/onboarding/modules']);
-        return;
-      }
-      this.activeModule.set('social');
-      this.showToast('Starting Social 18+ verification and opt-in...', 'info');
-      this.router.navigate(['/modules/social/opt-in']);
-    } else {
+    const hasAny = s.learning || s.hobbies || s.social;
+    if (!hasAny) {
       this.showToast('Please activate at least one module to continue.', 'warning');
+      return;
     }
+    this.navigateToNextSetupOrHome();
   }
 
   switchToModule(mod: ModuleId) {
     const s = this.session();
     if (!s.modules[mod]) {
-      this.showToast(`${mod.charAt(0).toUpperCase() + mod.slice(1)} module is currently inactive. You can enable it in Settings.`, 'warning');
+      this.showToast(`DEMO: ${mod.charAt(0).toUpperCase() + mod.slice(1)} module is currently inactive. You can enable it in Settings or Module Selection.`, 'warning');
+      this.router.navigate(['/settings/modules']);
       return;
     }
 
     if (mod === 'social') {
       if (!s.is18Plus) {
-        this.showToast('Social module is restricted to users 18 years of age or older.', 'warning');
+        this.showToast('DEMO Policy: Social module is restricted to verified adults aged 18 and older.', 'warning');
         return;
       }
       if (!this.socialProfile().optInAccepted) {
         this.activeModule.set('social');
+        this.showToast('DEMO: Social module requires explicit opt-in before use.', 'info');
         this.router.navigate(['/modules/social/opt-in']);
+        return;
+      }
+      if (!this.socialProfile().isSetupComplete) {
+        this.activeModule.set('social');
+        this.showToast('DEMO: Please complete your Social profile setup.', 'info');
+        this.router.navigate(['/modules/social/profile']);
+        return;
+      }
+    }
+
+    if (mod === 'learning') {
+      this.activeModule.set('learning');
+      if (!this.learningProfile().isSetupComplete) {
+        this.showToast('DEMO: Please complete your Learning profile setup.', 'info');
+        this.router.navigate(['/modules/learning/welcome']);
+        return;
+      }
+    }
+
+    if (mod === 'hobbies') {
+      this.activeModule.set('hobbies');
+      if (!this.hobbiesProfile().isSetupComplete) {
+        this.showToast('DEMO: Please complete your Hobbies profile setup.', 'info');
+        this.router.navigate(['/modules/hobbies/profile']);
         return;
       }
     }
 
     this.activeModule.set(mod);
-    switch (mod) {
-      case 'learning':
-        this.router.navigate(['/modules/learning/home']);
-        break;
-      case 'hobbies':
-        this.router.navigate(['/modules/hobbies/home']);
-        break;
-      case 'social':
-        this.router.navigate(['/modules/social/home']);
-        break;
-    }
+    this.router.navigate([`/modules/${mod}/home`]);
   }
 
   updateLearningProfile(updates: Partial<LearningProfile>) {
@@ -487,12 +558,18 @@ export class PrototypeStateService {
   completeLearningSetup() {
     this.learningProfile.update(p => ({
       ...p,
-      isSetupComplete: true,
-      xp: p.xp + 100
+      isSetupComplete: true
+      // No unapproved rewards issued
     }));
-    this.activeModule.set('learning');
-    this.showToast('Learning profile saved! +100 XP awarded. Welcome to Learning Home!', 'success');
-    this.router.navigate(['/modules/learning/home']);
+    this.showToast('Learning profile saved (DEMO).', 'success');
+
+    const next = this.getNextIncompleteModule();
+    if (next) {
+      this.navigateToNextSetupOrHome();
+    } else {
+      this.activeModule.set('learning');
+      this.router.navigate(['/modules/learning/home']);
+    }
   }
 
   updateHobbiesProfile(updates: Partial<HobbiesProfile>) {
@@ -502,17 +579,23 @@ export class PrototypeStateService {
   completeHobbiesSetup() {
     this.hobbiesProfile.update(p => ({
       ...p,
-      isSetupComplete: true,
-      flightPoints: p.flightPoints + 100
+      isSetupComplete: true
+      // Flight Points are not issued merely for profile creation
     }));
-    this.activeModule.set('hobbies');
-    this.showToast('Hobbies profile saved! +100 Flight Points awarded. Welcome to Hobbies Home!', 'success');
-    this.router.navigate(['/modules/hobbies/home']);
+    this.showToast('Hobbies profile saved (DEMO).', 'success');
+
+    const next = this.getNextIncompleteModule();
+    if (next) {
+      this.navigateToNextSetupOrHome();
+    } else {
+      this.activeModule.set('hobbies');
+      this.router.navigate(['/modules/hobbies/home']);
+    }
   }
 
   optInSocial() {
     if (!this.session().is18Plus) {
-      this.showToast('Social module requires age 18+ verification.', 'warning');
+      this.showToast('DEMO Policy: Social module requires age 18+ verification.', 'warning');
       return false;
     }
     this.socialProfile.update(p => ({
@@ -520,7 +603,7 @@ export class PrototypeStateService {
       ageVerified: true,
       optInAccepted: true
     }));
-    this.showToast('18+ Verification & Social Opt-in confirmed.', 'success');
+    this.showToast('18+ Verification & Social Opt-in confirmed (DEMO).', 'success');
     this.router.navigate(['/modules/social/profile']);
     return true;
   }
@@ -532,12 +615,18 @@ export class PrototypeStateService {
   completeSocialSetup() {
     this.socialProfile.update(p => ({
       ...p,
-      isSetupComplete: true,
-      socialSparkXp: p.socialSparkXp + 100
+      isSetupComplete: true
+      // No unapproved rewards issued
     }));
-    this.activeModule.set('social');
-    this.showToast('Social profile saved! +100 Social Spark awarded. Welcome to Social Home!', 'success');
-    this.router.navigate(['/modules/social/home']);
+    this.showToast('Social profile saved (DEMO).', 'success');
+
+    const next = this.getNextIncompleteModule();
+    if (next) {
+      this.navigateToNextSetupOrHome();
+    } else {
+      this.activeModule.set('social');
+      this.router.navigate(['/modules/social/home']);
+    }
   }
 
   resetDemoSession() {
